@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import coil.compose.AsyncImage
 import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
@@ -206,7 +207,7 @@ fun ProfileScreen(
                 }
 
                 Button(
-                    onClick = { viewModel.saveProfile(onSaved = { avatarUri = null }) },
+                    onClick = { viewModel.saveProfile(context = context, onSaved = { avatarUri = null }) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
@@ -217,6 +218,122 @@ fun ProfileScreen(
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
                         Text("Lưu", fontSize = 16.sp)
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text("Cài đặt nhắc nhở học tập", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = primaryColor)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Thông báo trên thiết bị", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text("Nhận nhắc nhở trực tiếp từ ứng dụng", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(
+                        checked = viewModel.pushEnabled,
+                        onCheckedChange = { viewModel.onPushEnabledChange(it) },
+                        colors = SwitchDefaults.colors(checkedThumbColor = primaryColor, checkedTrackColor = primaryColor.copy(alpha = 0.5f))
+                    )
+                }
+
+                HorizontalDivider(color = Color(0xFFE8F0ED))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Thông báo qua Email", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text("Nhận email nhắc nhở học tập hàng ngày", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(
+                        checked = viewModel.emailEnabled,
+                        onCheckedChange = { viewModel.onEmailEnabledChange(it) },
+                        colors = SwitchDefaults.colors(checkedThumbColor = primaryColor, checkedTrackColor = primaryColor.copy(alpha = 0.5f))
+                    )
+                }
+
+                HorizontalDivider(color = Color(0xFFE8F0ED))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Giờ nhắc nhở hằng ngày", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text("Chọn thời gian gửi thông báo nhắc học", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    
+                    val timePickerDialog = android.app.TimePickerDialog(
+                        context,
+                        { _, hourOfDay, minuteOfHour ->
+                            viewModel.onReminderTimeChange(hourOfDay, minuteOfHour)
+                        },
+                        viewModel.reminderHour,
+                        viewModel.reminderMinute,
+                        true
+                    )
+
+                    OutlinedButton(
+                        onClick = { timePickerDialog.show() },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, primaryColor)
+                    ) {
+                        Text(
+                            text = String.format(java.util.Locale.US, "%02d:%02d", viewModel.reminderHour, viewModel.reminderMinute),
+                            color = primaryColor,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = Color(0xFFE8F0ED))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { viewModel.sendTestEmail() },
+                        enabled = !viewModel.sendingTestEmail,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, primaryColor)
+                    ) {
+                        if (viewModel.sendingTestEmail) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = primaryColor)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Đang gửi...")
+                        } else {
+                            Icon(Icons.Default.Email, contentDescription = null, tint = primaryColor)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Gửi thử email nhắc học", color = primaryColor)
+                        }
+                    }
+
+                    if (viewModel.emailTestResult.isNotEmpty()) {
+                        Text(
+                            text = viewModel.emailTestResult,
+                            fontSize = 13.sp,
+                            color = if (viewModel.emailTestResult.startsWith("Lỗi") || viewModel.emailTestResult.startsWith("Không")) Color(0xFFB00020) else Color(0xFF147A70),
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
                     }
                 }
             }

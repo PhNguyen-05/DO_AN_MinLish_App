@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.UserSession
 import com.minlish.app.data.model.ProfileUpdateRequest
+import com.minlish.app.data.model.UserSettingsRequest
 import com.minlish.app.data.remote.RetrofitClient
+import android.content.Context
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -41,11 +43,30 @@ class ProfileViewModel : ViewModel() {
     var successMessage by mutableStateOf("")
         private set
 
+    // Settings States
+    var pushEnabled by mutableStateOf(true)
+    var emailEnabled by mutableStateOf(true)
+    var reminderHour by mutableStateOf(20)
+    var reminderMinute by mutableStateOf(0)
+
+    var sendingTestEmail by mutableStateOf(false)
+        private set
+    var emailTestResult by mutableStateOf("")
+
+    fun onPushEnabledChange(value: Boolean) { pushEnabled = value }
+    fun onEmailEnabledChange(value: Boolean) { emailEnabled = value }
+    fun onReminderTimeChange(hour: Int, minute: Int) {
+        reminderHour = hour
+        reminderMinute = minute
+    }
+    fun clearEmailTestResult() { emailTestResult = "" }
+
     fun loadProfile() {
         val token = UserSession.token ?: return
         loading = true
         viewModelScope.launch {
             try {
+                // Fetch profile
                 val resp = RetrofitClient.instance.getProfile(token)
                 fullName = resp.full_name
                 targetGoal = resp.target_goal
@@ -55,8 +76,16 @@ class ProfileViewModel : ViewModel() {
                 avatarUrl = RetrofitClient.resolveServerUrl(resp.avatar_url)
                 removeAvatar = false
                 error = ""
+
+                // Fetch settings
+                val settings = RetrofitClient.instance.getSettings(token)
+                pushEnabled = settings.notifications_enabled == 1
+                emailEnabled = settings.email_notifications_enabled == 1
+                val timeParts = settings.daily_reminder_time?.split(":") ?: listOf("20", "00")
+                reminderHour = timeParts.getOrNull(0)?.toIntOrNull() ?: 20
+                reminderMinute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
             } catch (e: Exception) {
-                error = "Không thể tải hồ sơ"
+                error = "Không thể tải hồ sơ hoặc cài đặt nhắc nhở."
             } finally {
                 loading = false
             }
@@ -75,7 +104,7 @@ class ProfileViewModel : ViewModel() {
         successMessage = ""
     }
 
-    fun saveProfile(onSaved: () -> Unit = {}) {
+    fun saveProfile(context: Context, onSaved: () -> Unit = {}) {
         val token = UserSession.token ?: run {
             error = "Không có token đăng nhập"
             return
@@ -94,6 +123,31 @@ class ProfileViewModel : ViewModel() {
                     removeAvatar = removeAvatar
                 )
                 val res = RetrofitClient.instance.updateProfile(token, req)
+
+                // Update settings on backend
+                val timeStr = String.format(java.util.Locale.US, "%02d:%02d:00", reminderHour, reminderMinute)
+                val settingsReq = UserSettingsRequest(
+                    theme = "system",
+                    dailyReminderTime = timeStr,
+                    notificationsEnabled = pushEnabled,
+                    emailNotificationsEnabled = emailEnabled,
+                    dailyNewWordsGoal = 20,
+                    dailyReviewGoal = 50
+                )
+                RetrofitClient.instance.updateSettings(token, settingsReq)
+
+                // Schedule local alarm
+                if (pushEnabled) {
+                    com.minlish.app.feature.notification.NotificationScheduler.scheduleDailyReminder(context, reminderHour, reminderMinute)
+                } else {
+                    com.minlish.app.feature.notification.NotificationScheduler.cancelDailyReminder(context)
+                }
+
+                // Save locally to preferences
+                com.minlish.app.feature.notification.ReminderPreferences.setDailyPushEnabled(context, pushEnabled)
+                com.minlish.app.feature.notification.ReminderPreferences.setEmailNotificationsEnabled(context, emailEnabled)
+                com.minlish.app.feature.notification.ReminderPreferences.saveReminderTime(context, reminderHour, reminderMinute)
+
                 if (res.isSuccessful) {
                     res.body()?.let { updated ->
                         fullName = updated.full_name
@@ -104,16 +158,35 @@ class ProfileViewModel : ViewModel() {
                         avatarMimeType = null
                         removeAvatar = false
                     }
-                    successMessage = "Cập nhật thành công"
+                    successMessage = "Lưu hồ sơ và cài đặt thành công."
                     error = ""
                     onSaved()
                 } else {
-                    error = res.errorBody()?.string()?.toApiErrorMessage() ?: "Cập nhật thất bại"
+                    error = res.errorBody()?.string()?.toApiErrorMessage() ?: "Cập nhật hồ sơ thất bại"
                 }
             } catch (e: Exception) {
-                error = "Lỗi kết nối"
+                error = "Lỗi kết nối: ${e.localizedMessage}"
             } finally {
                 loading = false
+            }
+        }
+    }
+
+    fun sendTestEmail() {
+        val token = UserSession.token ?: run {
+            emailTestResult = "Phiên đăng nhập không hợp lệ"
+            return
+        }
+        sendingTestEmail = true
+        emailTestResult = ""
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.instance.sendStudyReminderEmail(token)
+                emailTestResult = response.message ?: "Đã gửi email nhắc học thành công. Vui lòng kiểm tra hộp thư!"
+            } catch (e: Exception) {
+                emailTestResult = "Không gửi được email: ${e.localizedMessage}"
+            } finally {
+                sendingTestEmail = false
             }
         }
     }
