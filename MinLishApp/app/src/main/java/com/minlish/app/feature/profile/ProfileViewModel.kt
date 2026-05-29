@@ -21,6 +21,17 @@ class ProfileViewModel : ViewModel() {
     var level by mutableStateOf("A1")
         private set
 
+    var avatarBase64 by mutableStateOf<String?>(null)
+        private set
+
+    var avatarMimeType by mutableStateOf<String?>(null)
+        private set
+
+    var avatarUrl by mutableStateOf<String?>(null)
+        private set
+
+    private var removeAvatar by mutableStateOf(false)
+
     var loading by mutableStateOf(false)
         private set
 
@@ -39,6 +50,10 @@ class ProfileViewModel : ViewModel() {
                 fullName = resp.full_name
                 targetGoal = resp.target_goal
                 level = resp.current_level
+                avatarBase64 = resp.avatarBase64
+                avatarMimeType = resp.avatarMimeType
+                avatarUrl = RetrofitClient.resolveServerUrl(resp.avatar_url)
+                removeAvatar = false
                 error = ""
             } catch (e: Exception) {
                 error = "Không thể tải hồ sơ"
@@ -51,6 +66,14 @@ class ProfileViewModel : ViewModel() {
     fun onFullNameChange(value: String) { fullName = value }
     fun onTargetGoalChange(value: String) { targetGoal = value }
     fun onLevelChange(value: String) { level = value }
+    fun onAvatarChange(base64: String?, mimeType: String?) {
+        avatarBase64 = base64
+        avatarMimeType = mimeType
+        avatarUrl = null
+        removeAvatar = base64 == null
+        error = ""
+        successMessage = ""
+    }
 
     fun saveProfile(onSaved: () -> Unit = {}) {
         val token = UserSession.token ?: run {
@@ -65,7 +88,10 @@ class ProfileViewModel : ViewModel() {
                 val req = ProfileUpdateRequest(
                     fullName = fullName.trim(),
                     targetGoal = targetGoal.trim(),
-                    currentLevel = level.trim()
+                    currentLevel = level.trim(),
+                    avatarBase64 = avatarBase64,
+                    avatarMimeType = avatarMimeType,
+                    removeAvatar = removeAvatar
                 )
                 val res = RetrofitClient.instance.updateProfile(token, req)
                 if (res.isSuccessful) {
@@ -73,6 +99,10 @@ class ProfileViewModel : ViewModel() {
                         fullName = updated.full_name
                         targetGoal = updated.target_goal
                         level = updated.current_level
+                        avatarUrl = RetrofitClient.resolveServerUrl(updated.avatar_url)
+                        avatarBase64 = null
+                        avatarMimeType = null
+                        removeAvatar = false
                     }
                     successMessage = "Cập nhật thành công"
                     error = ""

@@ -15,6 +15,8 @@ import com.minlish.app.feature.auth.RegisterScreen
 import com.minlish.app.feature.auth.ResetPasswordScreen
 import com.minlish.app.feature.home.HomeScreen
 import com.minlish.app.feature.home.HomeViewModel
+import com.minlish.app.feature.importexport.ImportExportScreen
+import com.minlish.app.feature.importexport.ImportExportViewModel
 import com.minlish.app.feature.profile.ProfileScreen
 import com.minlish.app.feature.profile.ProfileViewModel
 import java.net.URLDecoder
@@ -37,6 +39,7 @@ fun MinLishAppNavigation() {
     val authViewModel: AuthViewModel = viewModel()
     val homeViewModel: HomeViewModel = viewModel()
     val profileViewModel: ProfileViewModel = viewModel()
+    val importExportViewModel: ImportExportViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
@@ -54,7 +57,12 @@ fun MinLishAppNavigation() {
         composable("register") {
             RegisterScreen(
                 viewModel = authViewModel,
-                onNavigateToLogin = { navController.navigate("login") }
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
         composable("forgot") {
@@ -78,7 +86,17 @@ fun MinLishAppNavigation() {
             )
         }
         composable("home") {
-            HomeScreen(viewModel = homeViewModel, onProfileClick = { navController.navigate("profile") })
+            HomeScreen(
+                viewModel = homeViewModel,
+                onProfileClick = { navController.navigate("profile") },
+                onImportExportClick = { navController.navigate("import_export") }
+            )
+        }
+        composable("import_export") {
+            ImportExportScreen(
+                viewModel = importExportViewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
         composable("profile") {
             ProfileScreen(

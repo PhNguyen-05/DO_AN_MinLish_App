@@ -94,6 +94,58 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun registerWithAvatar(
+        email: String,
+        password: String,
+        fullName: String,
+        targetGoal: String,
+        avatarBase64: String? = null,
+        avatarMimeType: String? = null,
+        onSuccess: () -> Unit = {}
+    ) {
+        registerMessage = ""
+        registerError = ""
+
+        val passwordError = validatePassword(password)
+        if (passwordError != null) {
+            registerError = passwordError
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val req = RegisterRequest(
+                    email = email.trim(),
+                    passwordHash = password,
+                    fullName = fullName.trim(),
+                    targetGoal = targetGoal.trim(),
+                    avatarBase64 = avatarBase64,
+                    avatarMimeType = avatarMimeType
+                )
+                val res = RetrofitClient.instance.register(req)
+
+                if (res.isSuccessful) {
+                    registerMessage = "Đăng ký tài khoản thành công!"
+                    registerError = ""
+                    onSuccess()
+                } else {
+                    registerMessage = ""
+                    registerError = res.errorBody()?.string()?.toApiErrorMessage()
+                        ?: "Đăng ký thất bại. Email có thể đã tồn tại."
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "register failed", e)
+                registerMessage = ""
+                registerError = "Lỗi kết nối với máy chủ. Vui lòng thử lại."
+            }
+        }
+    }
+
+    fun clearRegisterState() {
+        registerMessage = ""
+        registerError = ""
+    }
+
     fun sendForgotPassword(email: String, onSent: () -> Unit = {}, onError: (String) -> Unit = {}) {
         val normalizedEmail = email.trim()
         if (normalizedEmail.isEmpty()) {

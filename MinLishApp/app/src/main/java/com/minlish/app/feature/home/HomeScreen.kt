@@ -285,10 +285,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.animation.core.tween
+import com.minlish.app.data.remote.RetrofitClient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, onProfileClick: () -> Unit = {}) {
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    onProfileClick: () -> Unit = {},
+    onImportExportClick: () -> Unit = {}
+) {
     LaunchedEffect(Unit) {
         viewModel.fetchDashboardData()
     }
@@ -309,7 +314,8 @@ fun HomeScreen(viewModel: HomeViewModel, onProfileClick: () -> Unit = {}) {
                 actions = {
                     IconButton(onClick = onProfileClick) {
                         AsyncImage(
-                            model = "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
+                            model = RetrofitClient.resolveServerUrl(data?.avatar_url)
+                                ?: "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
                             contentDescription = "Avatar",
                             modifier = Modifier
                                 .size(40.dp)
@@ -363,7 +369,7 @@ fun HomeScreen(viewModel: HomeViewModel, onProfileClick: () -> Unit = {}) {
 
             // Quick Actions
             Text("Hành động nhanh", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            QuickActionsRow()
+            QuickActionsRow(onImportExportClick = onImportExportClick)
 
             // Continue Learning
             Text("Tiếp tục học", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -452,23 +458,28 @@ fun DailyGoalCard(dailyGoal: Int) {
 }
 
 @Composable
-fun QuickActionsRow() {
+fun QuickActionsRow(onImportExportClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Truyền quyền chia tỷ lệ trực tiếp tại đây
-        QuickActionButton(Icons.Default.Add, "Từ mới", modifier = Modifier.weight(1f))
+        QuickActionButton(Icons.Default.UploadFile, "Import", onClick = onImportExportClick, modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Replay, "Ôn tập", modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Edit, "Luyện tập", modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-fun QuickActionButton(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+fun QuickActionButton(
+    icon: ImageVector,
+    text: String,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     val primaryColor = Color(0xFF26A69A)
     OutlinedButton(
-        onClick = { /* TODO */ },
+        onClick = onClick,
         modifier = modifier, // Gán modifier nhận từ scope Row của cha vào đây
         shape = RoundedCornerShape(12.dp),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp) // Chống tràn chữ trên màn hình hẹp

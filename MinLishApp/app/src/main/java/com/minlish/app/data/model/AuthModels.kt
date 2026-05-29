@@ -4,7 +4,9 @@ data class RegisterRequest(
     val email: String,
     val passwordHash: String,
     val fullName: String,
-    val targetGoal: String
+    val targetGoal: String,
+    val avatarBase64: String? = null,
+    val avatarMimeType: String? = null
 )
 
 data class AuthResponse(
@@ -20,5 +22,6 @@ data class ApiMessageResponse(
 data class UserInfo(
     val id: Long,
     val full_name: String,
-    val email: String
+    val email: String,
+    val avatar_url: String? = null
 )

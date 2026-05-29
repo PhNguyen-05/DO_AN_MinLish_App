@@ -7,5 +7,6 @@ data class DashboardResponse(
     val current_streak: Int,
     val total_words_learned: Int,
     val accuracy_rate: Float,
-    val daily_new_words_goal: Int
+    val daily_new_words_goal: Int,
+    val avatar_url: String? = null
 )
