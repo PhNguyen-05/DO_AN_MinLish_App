@@ -9,6 +9,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.minlish.app.feature.auth.AuthViewModel
+import com.minlish.app.feature.auth.ForgotPasswordScreen
+import com.minlish.app.feature.auth.LoginScreen
+import com.minlish.app.feature.auth.RegisterScreen
+import com.minlish.app.feature.auth.ResetPasswordScreen
+import com.minlish.app.feature.home.HomeScreen
+import com.minlish.app.feature.home.HomeViewModel
+import com.minlish.app.feature.importexport.ImportExportScreen
+import com.minlish.app.feature.importexport.ImportExportViewModel
+import com.minlish.app.feature.profile.ProfileScreen
+import com.minlish.app.feature.profile.ProfileViewModel
+import java.net.URLDecoder
+import java.net.URLEncoder
+=======
 import com.minlish.app.feature.auth.LoginScreen
 import com.minlish.app.feature.auth.RegisterScreen
 import com.minlish.app.feature.home.HomeScreen
@@ -30,12 +43,15 @@ fun MinLishAppNavigation() {
     // Cấp phát các bộ não xử lý (ViewModel) cho các Feature tương ứng
     val authViewModel: AuthViewModel = viewModel()
     val homeViewModel: HomeViewModel = viewModel()
+    val profileViewModel: ProfileViewModel = viewModel()
+    val importExportViewModel: ImportExportViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
                 viewModel = authViewModel,
                 onNavigateToRegister = { navController.navigate("register") },
+                onNavigateToForgot = { navController.navigate("forgot") },
                 onLoginSuccess = {
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true } // Clear stack tránh back ngược lại Login
@@ -46,6 +62,59 @@ fun MinLishAppNavigation() {
         composable("register") {
             RegisterScreen(
                 viewModel = authViewModel,
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+        composable("forgot") {
+            ForgotPasswordScreen(
+                viewModel = authViewModel,
+                onNavigateToReset = { email ->
+                    val encoded = URLEncoder.encode(email, "UTF-8")
+                    navController.navigate("reset/$encoded")
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("reset/{email}") { backStackEntry ->
+            val encoded = backStackEntry.arguments?.getString("email")
+            val email = encoded?.let { URLDecoder.decode(it, "UTF-8") }
+            ResetPasswordScreen(
+                viewModel = authViewModel,
+                email = email,
+                onResetSuccess = { navController.navigate("login") { popUpTo("login") { inclusive = true } } },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("home") {
+            HomeScreen(
+                viewModel = homeViewModel,
+                onProfileClick = { navController.navigate("profile") },
+                onImportExportClick = { navController.navigate("import_export") }
+            )
+        }
+        composable("import_export") {
+            ImportExportScreen(
+                viewModel = importExportViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("profile") {
+            ProfileScreen(
+                viewModel = profileViewModel,
+                onBack = { navController.popBackStack() },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate("login") { popUpTo("home") { inclusive = true } }
+                }
+            )
+        }
+    }
+}
                 onNavigateToLogin = { navController.navigate("login") }
             )
         }

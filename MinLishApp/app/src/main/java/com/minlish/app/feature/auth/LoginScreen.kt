@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 fun LoginScreen(
     viewModel: AuthViewModel,
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgot: () -> Unit,
+
     onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -134,6 +136,15 @@ fun LoginScreen(
         TextButton(onClick = onNavigateToRegister) {
             Text(
                 "Chưa có tài khoản? Đăng ký ngay",
+                color = primaryColor,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        // Link quên mật khẩu
+        TextButton(onClick = onNavigateToForgot) {
+            Text(
+                "Quên mật khẩu?",
                 color = primaryColor,
                 fontWeight = FontWeight.Medium
             )
