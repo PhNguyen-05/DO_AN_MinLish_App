@@ -1,4 +1,4 @@
-#Thu May 28 12:15:47 ICT 2026
+#Fri May 29 11:02:35 ICT 2026
 base.0=C\:\\Users\\LENOVO\\Documents\\GitHub\\DO_AN_MinLish_App\\MinLishApp\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\LENOVO\\Documents\\GitHub\\DO_AN_MinLish_App\\MinLishApp\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.10=C\:\\Users\\LENOVO\\Documents\\GitHub\\DO_AN_MinLish_App\\MinLishApp\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex

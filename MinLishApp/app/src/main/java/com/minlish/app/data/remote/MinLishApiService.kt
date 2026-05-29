@@ -44,7 +44,15 @@ object RetrofitClient {
     // Default for Android emulator (AVD): use host machine via 10.0.2.2
     // If you run the app on a physical device, set this to your PC LAN IP (e.g. "http://192.168.0.114:3000/")
     // For Genymotion emulator use 10.0.3.2
-    private const val BASE_URL = "http://172.16.31.170:3000/"
+    private const val BASE_URL = "http://172.16.31.99:3000/"
+
+    val instance: MinLishApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MinLishApiService::class.java)
+    }
 
     fun resolveServerUrl(url: String?): String? {
         val value = url?.trim().orEmpty()
@@ -54,15 +62,16 @@ object RetrofitClient {
     }
 }
 
-object RetrofitClient {
-    private const val BASE_URL = "http://192.168.0.114:3000/"
-    //private const val BASE_URL = "http://10.0.2.2:3000/"
-    //private const val BASE_URL = "http://172.16.31.163:3000/"
+//object RetrofitClient {
+//    private const val BASE_URL = "http://192.168.0.114:3000/"
+//    //private const val BASE_URL = "http://10.0.2.2:3000/"
+//    //private const val BASE_URL = "http://172.16.31.163:3000/"
+//
+//    val instance: MinLishApiService by lazy {
+//        Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create())
+//            .build()
+//            .create(MinLishApiService::class.java)
+//    }
 
-    val instance: MinLishApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MinLishApiService::class.java)
-    }

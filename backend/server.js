@@ -1,6 +1,4 @@
-
 ﻿const express = require('express');
-const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -25,6 +23,7 @@ const uploadRoot = path.join(__dirname, 'uploads');
 const avatarUploadDir = path.join(uploadRoot, 'avatars');
 fs.mkdirSync(avatarUploadDir, { recursive: true });
 app.use('/uploads', express.static(uploadRoot));
+app.use('/static', express.static('public'));
 
 function saveAvatarFromBase64(avatarBase64, avatarMimeType = 'image/jpeg') {
     if (!avatarBase64) return null;
@@ -65,7 +64,7 @@ function deleteAvatarFile(avatarUrl) {
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
+const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
 const smtpSecure = process.env.SMTP_SECURE === 'true' || false;
 
 let transporter;
@@ -80,98 +79,43 @@ if (smtpUser && smtpPass) {
     console.warn('SMTP credentials not provided. Forgot-password emails will fail until SMTP_USER and SMTP_PASS are set.');
 }
 
-// MÃ£ khÃ³a bÃ­ máº­t Ä‘á»ƒ mÃ£ hÃ³a vÃ  giáº£i mÃ£ JWT Token
-const JWT_SECRET = "minlish_super_secret_key_2026";
+const JWT_SECRET = process.env.JWT_SECRET || 'minlish_super_secret_key_2026';
 
-// Cáº¥u hÃ¬nh káº¿t ná»‘i MySQL Database káº¿t há»£p Connection Pool tá»‘i Æ°u hiá»‡u nÄƒng
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '123456', // Thay báº±ng máº­t kháº©u MySQL chuáº©n trÃªn mÃ¡y cá»§a báº¡n
-
-const app = express();
-
-app.use('/static', express.static('public'));
-
-app.use(express.json());
-app.use(cors());
-
-// Mã khóa bí mật để mã hóa và giải mã JWT Token
-const JWT_SECRET = "minlish_super_secret_key_2026";
-
-// Cấu hình kết nối MySQL Database kết hợp Connection Pool tối ưu hiệu năng
-const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '123456', // Thay bằng mật khẩu MySQL chuẩn trên máy của bạn
-    database: 'minlish_db',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '123456',
+    database: process.env.DB_NAME || 'minlish_db',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
 
 // ==========================================
-// 1. API ÄÄ‚NG KÃ TÃ€I KHOáº¢N Má»šI
-// ==========================================
-app.post('/api/auth/register', async (req, res) => {
-    // Há»©ng chÃ­nh xÃ¡c cÃ¡c biáº¿n dáº¡ng CamelCase gá»­i lÃªn tá»« táº§ng Frontend Kotlin
-    const { email, passwordHash, fullName, targetGoal, avatarBase64, avatarMimeType } = req.body;
-
-    if (!email || !passwordHash || !fullName) {
-        return res.status(400).json({ message: 'Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ cÃ¡c trÆ°á»ng thÃ´ng tin báº¯t buá»™c!' });
-    }
-
-    try {
-        // Kiá»ƒm tra xem Email Ä‘Ã£ cÃ³ ai Ä‘Äƒng kÃ½ trÆ°á»›c Ä‘Ã³ chÆ°a
-        const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-        if (existingUsers.length > 0) {
-            return res.status(400).json({ message: 'Email nÃ y Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng!' });
-        }
-
-        // BÄƒm máº­t kháº©u nháº­n tá»« Android báº±ng thÆ° viá»‡n bcrypt nháº±m báº£o máº­t thÃ´ng tin
-        const encryptedPassword = await bcrypt.hash(passwordHash, 10);
-        const avatarUrl = saveAvatarFromBase64(avatarBase64, avatarMimeType);
-        
-        // ChÃ¨n thÃ´ng tin tÃ i khoáº£n má»›i vÃ o báº£ng users dá»±a trÃªn schema db.sql
-        const [userResult] = await db.query(
-            'INSERT INTO users (email, password_hash, full_name, target_goal, avatar_url) VALUES (?, ?, ?, ?, ?)',
-            [email, encryptedPassword, fullName, targetGoal || 'TOEIC 700', avatarUrl]
-        );
-        const userId = userResult.insertId;
-
-        // Tá»° Äá»˜NG KHá»žI Táº O: Táº¡o báº£n ghi rá»—ng cho pháº§n CÃ i Ä‘áº·t vÃ  Thá»‘ng kÃª Ä‘á»ƒ trÃ¡nh lá»—i null dá»¯ liá»‡u
-        await db.query('INSERT INTO user_settings (user_id) VALUES (?)', [userId]);
-        await db.query('INSERT INTO user_statistics (user_id) VALUES (?)', [userId]);
-
-        res.status(201).json({ message: 'ÄÄƒng kÃ½ tÃ i khoáº£n MinLish thÃ nh cÃ´ng!' });
 // 1. API ĐĂNG KÝ TÀI KHOẢN MỚI
 // ==========================================
 app.post('/api/auth/register', async (req, res) => {
-    // Hứng chính xác các biến dạng CamelCase gửi lên từ tầng Frontend Kotlin
-    const { email, passwordHash, fullName, targetGoal } = req.body;
+    const { email, passwordHash, fullName, targetGoal, avatarBase64, avatarMimeType } = req.body;
 
     if (!email || !passwordHash || !fullName) {
         return res.status(400).json({ message: 'Vui lòng nhập đầy đủ các trường thông tin bắt buộc!' });
     }
 
     try {
-        // Kiểm tra xem Email đã có ai đăng ký trước đó chưa
         const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
         if (existingUsers.length > 0) {
             return res.status(400).json({ message: 'Email này đã tồn tại trong hệ thống!' });
         }
 
-        // Băm mật khẩu nhận từ Android bằng thư viện bcrypt nhằm bảo mật thông tin
         const encryptedPassword = await bcrypt.hash(passwordHash, 10);
-        
-        // Chèn thông tin tài khoản mới vào bảng users dựa trên schema db.sql
+        const avatarUrl = saveAvatarFromBase64(avatarBase64, avatarMimeType);
+
         const [userResult] = await db.query(
-            'INSERT INTO users (email, password_hash, full_name, target_goal) VALUES (?, ?, ?, ?)',
-            [email, encryptedPassword, fullName, targetGoal || 'TOEIC 700']
+            'INSERT INTO users (email, password_hash, full_name, target_goal, avatar_url) VALUES (?, ?, ?, ?, ?)',
+            [email, encryptedPassword, fullName, targetGoal || 'TOEIC 700', avatarUrl]
         );
         const userId = userResult.insertId;
 
-        // TỰ ĐỘNG KHỞI TẠO: Tạo bản ghi rỗng cho phần Cài đặt và Thống kê để tránh lỗi null dữ liệu
         await db.query('INSERT INTO user_settings (user_id) VALUES (?)', [userId]);
         await db.query('INSERT INTO user_statistics (user_id) VALUES (?)', [userId]);
 
@@ -183,48 +127,27 @@ app.post('/api/auth/register', async (req, res) => {
 
 // ==========================================
 // 2. API ĐĂNG NHẬP HỆ THỐNG
-
 // ==========================================
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ message: 'Vui lÃ²ng cung cáº¥p Ä‘áº§y Ä‘á»§ email vÃ  máº­t kháº©u!' });
-    }
-
-    try {
-        // TÃ¬m kiáº¿m ngÆ°á»i dÃ¹ng dá»±a trÃªn email nháº­p vÃ o
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (users.length === 0) {
-            return res.status(400).json({ message: 'TÃ i khoáº£n hoáº·c máº­t kháº©u khÃ´ng chÃ­nh xÃ¡c!' });
         return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ email và mật khẩu!' });
     }
 
     try {
-        // Tìm kiếm người dùng dựa trên email nhập vào
         const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         if (users.length === 0) {
             return res.status(400).json({ message: 'Tài khoản hoặc mật khẩu không chính xác!' });
         }
 
         const user = users[0];
-        
-        // So khá»›p máº­t kháº©u thuáº§n ngÆ°á»i dÃ¹ng nháº­p vá»›i chuá»—i bÄƒm lÆ°u giá»¯ trong MySQL
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'TÃ i khoáº£n hoáº·c máº­t kháº©u khÃ´ng chÃ­nh xÃ¡c!' });
-        }
-
-        // Táº¡o chuá»—i mÃ£ Token JWT cÃ³ giÃ¡ trá»‹ sá»­ dá»¥ng liÃªn tá»¥c trong vÃ²ng 30 ngÃ y
-        // So khớp mật khẩu thuần người dùng nhập với chuỗi băm lưu giữ trong MySQL
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
             return res.status(400).json({ message: 'Tài khoản hoặc mật khẩu không chính xác!' });
         }
 
-        // Tạo chuỗi mã Token JWT có giá trị sử dụng liên tục trong vòng 30 ngày
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
-        
         res.json({ 
             token, 
             user: { 
@@ -232,8 +155,6 @@ app.post('/api/auth/login', async (req, res) => {
                 full_name: user.full_name, 
                 email: user.email,
                 avatar_url: user.avatar_url
-                email: user.email 
-
             } 
         });
     } catch (err) {
@@ -243,47 +164,33 @@ app.post('/api/auth/login', async (req, res) => {
 
 // ==========================================
 // MIDDLEWARE XÁC THỰC QUYỀN TRUY CẬP (JWT)
-
 // ==========================================
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.status(401).json({ message: 'Quyá»n truy cáº­p bá»‹ tá»« chá»‘i do thiáº¿u Token xÃ¡c thá»±c!' });
-        return res.status(401).json({ message: 'Quyền truy cập bị từ chối do thiếu Token xác thực!' });
 
+    if (!token) {
+        return res.status(401).json({ message: 'Quyền truy cập bị từ chối do thiếu Token xác thực!' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, decodedUser) => {
         if (err) {
-            return res.status(403).json({ message: 'Token cá»§a báº¡n Ä‘Ã£ háº¿t háº¡n hoáº·c khÃ´ng há»£p lá»‡!' });
-        }
-        req.user = decodedUser; // LÆ°u giá»¯ thÃ´ng tin Ä‘á»‹nh danh cá»§a user vÃ o request Ä‘á»ƒ dÃ¹ng cho cÃ¡c hÃ m sau
             return res.status(403).json({ message: 'Token của bạn đã hết hạn hoặc không hợp lệ!' });
         }
-        req.user = decodedUser; // Lưu giữ thông tin định danh của user vào request để dùng cho các hàm sau
+
+        req.user = decodedUser;
         next();
     });
 };
 
 // ==========================================
-
 // 3. API TRANG CHỦ (LẤY DỮ LIỆU THỐNG KÊ DASHBOARD)
-
 // ==========================================
 app.get('/api/dashboard', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
-       
-  
         const [data] = await db.query(`
             SELECT u.full_name, u.target_goal, u.current_level, u.avatar_url,
-
-        // Câu truy vấn tổng hợp. Đã thay đổi alias bảng user_settings từ "set" thành "us" để tránh lỗi MySQL trùng từ khóa hệ thống.
-        const [data] = await db.query(`
-            SELECT u.full_name, u.target_goal, u.current_level,
-
                    s.current_streak, s.total_words_learned, s.accuracy_rate,
                    us.daily_new_words_goal
             FROM users u
@@ -293,15 +200,8 @@ app.get('/api/dashboard', authenticateToken, async (req, res) => {
         `, [userId]);
 
         if (data.length === 0) {
-            return res.status(404).json({ message: 'KhÃ´ng tÃ¬m tháº¥y dá»¯ liá»‡u thá»‘ng kÃª cá»§a ngÆ°á»i dÃ¹ng nÃ y!' });
-        }
-        
-        // Tráº£ vá» káº¿t quáº£ JSON, cáº¥u trÃºc khá»›p 100% vá»›i DashboardResponse data class cá»§a Kotlin
-
             return res.status(404).json({ message: 'Không tìm thấy dữ liệu thống kê của người dùng này!' });
         }
-        
-        // Trả về kết quả JSON, cấu trúc khớp 100% với DashboardResponse data class của Kotlin
 
         res.json(data[0]);
     } catch (err) {
@@ -310,78 +210,69 @@ app.get('/api/dashboard', authenticateToken, async (req, res) => {
 });
 
 // ==========================================
-// 4. QUÃŠN Máº¬T KHáº¨U - Gá»¬I OTP QUA EMAIL (Gmail)
+// 4. QUÊN MẬT KHẨU - GỬI OTP QUA EMAIL (Gmail)
 // ==========================================
 app.post('/api/auth/forgot-password', async (req, res) => {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Vui lÃ²ng cung cáº¥p email.' });
+    if (!email) return res.status(400).json({ message: 'Vui lòng cung cấp email.' });
 
     try {
         const [users] = await db.query('SELECT id, email FROM users WHERE email = ?', [email]);
-        if (users.length === 0) return res.status(400).json({ message: 'KhÃ´ng tÃ¬m tháº¥y tÃ i khoáº£n vá»›i email nÃ y.' });
+        if (users.length === 0) return res.status(400).json({ message: 'Không tìm thấy tài khoản với email này.' });
+        if (!transporter) return res.status(500).json({ message: 'SMTP chưa được cấu hình trên server. Vui lòng thiết lập SMTP_USER và SMTP_PASS.' });
 
-        if (!transporter) return res.status(500).json({ message: 'SMTP chÆ°a Ä‘Æ°á»£c cáº¥u hÃ¬nh trÃªn server. Vui lÃ²ng thiáº¿t láº­p SMTP_USER vÃ  SMTP_PASS.' });
-
-        // Táº¡o mÃ£ OTP 6 chá»¯ sá»‘
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = Date.now() + 10 * 60 * 1000; // 10 phÃºt
+        const expiresAt = Date.now() + 10 * 60 * 1000;
 
-        // Gá»­i email chá»©a mÃ£ OTP
         const fromAddr = process.env.SMTP_FROM || smtpUser;
         await transporter.sendMail({
             from: fromAddr,
             to: email,
-            subject: 'MinLish - MÃ£ OTP Ä‘áº·t láº¡i máº­t kháº©u',
-            text: `MÃ£ OTP cá»§a báº¡n lÃ  ${otp}. MÃ£ cÃ³ hiá»‡u lá»±c trong 10 phÃºt.`
+            subject: 'MinLish - Mã OTP đặt lại mật khẩu',
+            text: `Mã OTP của bạn là ${otp}. Mã có hiệu lực trong 10 phút.`
         });
 
-        // LÆ°u OTP vÃ o bá»™ nhá»› táº¡m thá»i
         otpStore.set(email, { code: otp, expiresAt });
-
-        res.json({ message: 'MÃ£ OTP Ä‘Ã£ Ä‘Æ°á»£c gá»­i tá»›i email cá»§a báº¡n. Vui lÃ²ng kiá»ƒm tra há»™p thÆ°.' });
+        res.json({ message: 'Mã OTP đã được gửi tới email của bạn. Vui lòng kiểm tra hộp thư.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 // ==========================================
-// 5. RESET Máº¬T KHáº¨U Vá»šI OTP
+// 5. RESET MẬT KHẨU VỚI OTP
 // ==========================================
 app.post('/api/auth/reset-password', async (req, res) => {
     const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword) return res.status(400).json({ message: 'Vui lÃ²ng cung cáº¥p email, mÃ£ OTP vÃ  máº­t kháº©u má»›i.' });
+    if (!email || !otp || !newPassword) return res.status(400).json({ message: 'Vui lòng cung cấp email, mã OTP và mật khẩu mới.' });
 
     try {
         const record = otpStore.get(email);
-        if (!record) return res.status(400).json({ message: 'KhÃ´ng cÃ³ mÃ£ OTP nÃ o Ä‘Æ°á»£c yÃªu cáº§u cho email nÃ y.' });
-        if (record.code !== otp) return res.status(400).json({ message: 'MÃ£ OTP khÃ´ng há»£p lá»‡.' });
+        if (!record) return res.status(400).json({ message: 'Không có mã OTP nào được yêu cầu cho email này.' });
+        if (record.code !== otp) return res.status(400).json({ message: 'Mã OTP không hợp lệ.' });
         if (record.expiresAt < Date.now()) {
             otpStore.delete(email);
-            return res.status(400).json({ message: 'MÃ£ OTP Ä‘Ã£ háº¿t háº¡n.' });
+            return res.status(400).json({ message: 'Mã OTP đã hết hạn.' });
         }
 
-        // Hash máº­t kháº©u má»›i vÃ  cáº­p nháº­t vÃ o database
         const hashed = await bcrypt.hash(newPassword, 10);
         await db.query('UPDATE users SET password_hash = ? WHERE email = ?', [hashed, email]);
-
-        // XÃ³a mÃ£ OTP sau khi sá»­ dá»¥ng
         otpStore.delete(email);
 
-        res.json({ message: 'Máº­t kháº©u Ä‘Ã£ Ä‘Æ°á»£c Ä‘áº·t láº¡i thÃ nh cÃ´ng.' });
+        res.json({ message: 'Mật khẩu đã được đặt lại thành công.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 // ==========================================
-// 6. Há»’ SÆ  NGÆ¯á»œI DÃ™NG - Láº¤Y VÃ€ Cáº¬P NHáº¬T
-//    TrÆ°á»ng: full_name, target_goal, current_level
+// 6. HỒ SƠ NGƯỜI DÙNG - LẤY VÀ CẬP NHẬT
 // ==========================================
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const [rows] = await db.query('SELECT id, email, full_name, target_goal, current_level, avatar_url FROM users WHERE id = ?', [userId]);
-        if (rows.length === 0) return res.status(404).json({ message: 'NgÆ°á»i dÃ¹ng khÃ´ng tá»“n táº¡i.' });
+        if (rows.length === 0) return res.status(404).json({ message: 'Người dùng không tồn tại.' });
         res.json(rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -411,7 +302,7 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
             values.push(null);
         }
 
-        if (fields.length === 0) return res.status(400).json({ message: 'KhÃ´ng cÃ³ dá»¯ liá»‡u Ä‘á»ƒ cáº­p nháº­t.' });
+        if (fields.length === 0) return res.status(400).json({ message: 'Không có dữ liệu để cập nhật.' });
 
         values.push(userId);
         await db.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
@@ -420,7 +311,6 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
             deleteAvatarFile(oldAvatarUrl);
         }
 
-        // Tráº£ vá» há»“ sÆ¡ Ä‘Ã£ cáº­p nháº­t
         const [rows] = await db.query('SELECT id, email, full_name, target_goal, current_level, avatar_url FROM users WHERE id = ?', [userId]);
         res.json(rows[0]);
     } catch (err) {
@@ -428,10 +318,5 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
     }
 });
 
-// Khởi chạy ứng dụng Server lắng nghe ở cổng 3000
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Hệ thống Backend MinLish đang hoạt động ổn định tại http://localhost:${PORT}`));
-// Khởi chạy ứng dụng Server lắng nghe ở cổng 3000
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Hệ thống Backend MinLish đang hoạt động ổn định tại http://localhost:${PORT}`));
-

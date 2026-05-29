@@ -10,5 +10,3 @@ data class DashboardResponse(
     val daily_new_words_goal: Int,
     val avatar_url: String? = null
 )
-    val daily_new_words_goal: Int
-)

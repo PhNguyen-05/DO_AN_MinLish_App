@@ -8,7 +8,6 @@ data class RegisterRequest(
     val targetGoal: String,
     val avatarBase64: String? = null,
     val avatarMimeType: String? = null
-    val targetGoal: String
 )
 
 data class AuthResponse(
@@ -26,10 +25,5 @@ data class UserInfo(
     val full_name: String,
     val email: String,
     val avatar_url: String? = null
-)
-data class UserInfo(
-    val id: Long,
-    val full_name: String,
-    val email: String
 )
 
