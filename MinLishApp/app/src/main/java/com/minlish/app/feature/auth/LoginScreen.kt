@@ -21,6 +21,7 @@ fun LoginScreen(
     viewModel: AuthViewModel,
     onNavigateToRegister: () -> Unit,
     onNavigateToForgot: () -> Unit,
+
     onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }

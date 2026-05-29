@@ -285,6 +285,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.animation.core.tween
+
 import com.minlish.app.data.remote.RetrofitClient
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -294,6 +295,10 @@ fun HomeScreen(
     onProfileClick: () -> Unit = {},
     onImportExportClick: () -> Unit = {}
 ) {
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(viewModel: HomeViewModel) {
     LaunchedEffect(Unit) {
         viewModel.fetchDashboardData()
     }
@@ -312,10 +317,14 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("MinLish", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 actions = {
+
                     IconButton(onClick = onProfileClick) {
                         AsyncImage(
                             model = RetrofitClient.resolveServerUrl(data?.avatar_url)
                                 ?: "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
+                    IconButton(onClick = { /* Navigate to Profile */ }) {
+                        AsyncImage(
+                            model = "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
                             contentDescription = "Avatar",
                             modifier = Modifier
                                 .size(40.dp)
@@ -369,7 +378,11 @@ fun HomeScreen(
 
             // Quick Actions
             Text("Hành động nhanh", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+
             QuickActionsRow(onImportExportClick = onImportExportClick)
+
+            QuickActionsRow()
+
 
             // Continue Learning
             Text("Tiếp tục học", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -458,19 +471,25 @@ fun DailyGoalCard(dailyGoal: Int) {
 }
 
 @Composable
+
 fun QuickActionsRow(onImportExportClick: () -> Unit) {
+fun QuickActionsRow() {
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Truyền quyền chia tỷ lệ trực tiếp tại đây
+
         QuickActionButton(Icons.Default.UploadFile, "Import", onClick = onImportExportClick, modifier = Modifier.weight(1f))
+        QuickActionButton(Icons.Default.Add, "Từ mới", modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Replay, "Ôn tập", modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Edit, "Luyện tập", modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
+
 fun QuickActionButton(
     icon: ImageVector,
     text: String,
@@ -480,6 +499,10 @@ fun QuickActionButton(
     val primaryColor = Color(0xFF26A69A)
     OutlinedButton(
         onClick = onClick,
+fun QuickActionButton(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    val primaryColor = Color(0xFF26A69A)
+    OutlinedButton(
+        onClick = { /* TODO */ },
         modifier = modifier, // Gán modifier nhận từ scope Row của cha vào đây
         shape = RoundedCornerShape(12.dp),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp) // Chống tràn chữ trên màn hình hẹp
@@ -551,4 +574,3 @@ fun SuggestedDeckCard(deck: SuggestedDeck) {
             }
         }
     }
-}

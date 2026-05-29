@@ -22,13 +22,13 @@ class AuthViewModel : ViewModel() {
 
     var registerError by mutableStateOf("")
         private set
-
     var forgotMessage by mutableStateOf("")
         private set
 
     var forgotError by mutableStateOf("")
         private set
 
+    // Kiểm tra độ mạnh mật khẩu
     fun validatePassword(password: String): String? {
         if (password.length < 8) {
             return "Mật khẩu phải có ít nhất 8 ký tự"
@@ -48,6 +48,7 @@ class AuthViewModel : ViewModel() {
         return null
     }
 
+    // Kiểm tra xác nhận mật khẩu
     fun validateConfirmPassword(password: String, confirmPassword: String): String? {
         if (confirmPassword.isEmpty()) return "Vui lòng xác nhận mật khẩu"
         if (password != confirmPassword) return "Mật khẩu xác nhận không khớp"
@@ -58,6 +59,7 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.instance.login(mapOf("email" to email.trim(), "password" to password))
+                val response = RetrofitClient.instance.login(mapOf("email" to email, "password" to password))
                 UserSession.token = "Bearer ${response.token}"
                 loginError = ""
                 onSuccess()
@@ -77,6 +79,7 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val req = RegisterRequest(email.trim(), password, fullName.trim(), targetGoal.trim())
+                val req = RegisterRequest(email, password, fullName, targetGoal)
                 val res = RetrofitClient.instance.register(req)
 
                 registerMessage = if (res.isSuccessful) {
@@ -214,5 +217,14 @@ class AuthViewModel : ViewModel() {
         registerError = ""
         forgotMessage = ""
         forgotError = ""
+    }
+}
+                    "Đăng ký thất bại. Email có thể đã tồn tại."
+                }
+                registerError = ""
+            } catch (e: Exception) {
+                registerMessage = "Lỗi kết nối với máy chủ. Vui lòng thử lại."
+            }
+        }
     }
 }

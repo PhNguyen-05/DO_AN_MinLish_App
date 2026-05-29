@@ -21,6 +21,11 @@ import com.minlish.app.feature.profile.ProfileScreen
 import com.minlish.app.feature.profile.ProfileViewModel
 import java.net.URLDecoder
 import java.net.URLEncoder
+=======
+import com.minlish.app.feature.auth.LoginScreen
+import com.minlish.app.feature.auth.RegisterScreen
+import com.minlish.app.feature.home.HomeScreen
+import com.minlish.app.feature.home.HomeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +112,14 @@ fun MinLishAppNavigation() {
                     navController.navigate("login") { popUpTo("home") { inclusive = true } }
                 }
             )
+        }
+    }
+}
+                onNavigateToLogin = { navController.navigate("login") }
+            )
+        }
+        composable("home") {
+            HomeScreen(viewModel = homeViewModel)
         }
     }
 }

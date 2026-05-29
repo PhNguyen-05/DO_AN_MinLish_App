@@ -1,5 +1,4 @@
 package com.minlish.app.feature.auth
-
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,24 +14,34 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+
+import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import coil.compose.AsyncImage
 import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +56,7 @@ fun RegisterScreen(
     var targetGoal by remember { mutableStateOf("TOEIC 700") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+
     var formSubmitted by remember { mutableStateOf(false) }
     var avatarUri by remember { mutableStateOf<Uri?>(null) }
     var avatarError by remember { mutableStateOf("") }
@@ -77,14 +87,26 @@ fun RegisterScreen(
     val primaryColor = Color(0xFF26A69A)
     val secondaryColor = Color(0xFF4ECDC4)
 
+
+    val passwordError = viewModel.validatePassword(password)
+    val confirmError = viewModel.validateConfirmPassword(password, confirmPassword)
+
+    val primaryColor = Color(0xFF26A69A)     // Teal chính theo logo
+    val secondaryColor = Color(0xFF4ECDC4)   // Mint Green
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+
             .verticalScroll(rememberScrollState())
+
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Logo/Icon
+
         Icon(
             imageVector = Icons.Default.School,
             contentDescription = "MinLish",
@@ -172,6 +194,10 @@ fun RegisterScreen(
                     Text(avatarError, color = MaterialTheme.colorScheme.error, fontSize = 14.sp)
                 }
 
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                // Họ và tên
+
                 OutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
@@ -180,6 +206,8 @@ fun RegisterScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                // Email
+
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -187,6 +215,8 @@ fun RegisterScreen(
                     leadingIcon = { Icon(Icons.Default.Email, null, tint = primaryColor) },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Mật khẩu
 
                 OutlinedTextField(
                     value = password,
@@ -203,6 +233,7 @@ fun RegisterScreen(
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+
                     isError = showPasswordError,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -210,6 +241,17 @@ fun RegisterScreen(
                 if (showPasswordError) {
                     Text(passwordError.orEmpty(), color = MaterialTheme.colorScheme.error, fontSize = 14.sp)
                 }
+
+
+                    isError = passwordError != null && password.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (passwordError != null && password.isNotEmpty()) {
+                    Text(passwordError, color = MaterialTheme.colorScheme.error, fontSize = 14.sp)
+                }
+
+                // Xác nhận mật khẩu
 
                 OutlinedTextField(
                     value = confirmPassword,
@@ -226,6 +268,7 @@ fun RegisterScreen(
                         }
                     },
                     visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+
                     isError = showConfirmError,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -233,6 +276,16 @@ fun RegisterScreen(
                 if (showConfirmError) {
                     Text(confirmError.orEmpty(), color = MaterialTheme.colorScheme.error, fontSize = 14.sp)
                 }
+
+                    isError = confirmError != null && confirmPassword.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (confirmError != null && confirmPassword.isNotEmpty()) {
+                    Text(confirmError, color = MaterialTheme.colorScheme.error, fontSize = 14.sp)
+                }
+
+                // Mục tiêu học
 
                 OutlinedTextField(
                     value = targetGoal,
@@ -287,6 +340,17 @@ fun RegisterScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        if (passwordError == null && confirmError == null) {
+                            viewModel.register(email, password, fullName, targetGoal)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
+
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
                 ) {
@@ -342,3 +406,5 @@ private fun Bitmap.resizeToMax(maxSizePx: Int): Bitmap {
     val targetHeight = (height * scale).roundToInt().coerceAtLeast(1)
     return Bitmap.createScaledBitmap(this, targetWidth, targetHeight, true)
 }
+}
+

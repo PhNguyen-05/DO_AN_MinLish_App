@@ -52,6 +52,12 @@ object RetrofitClient {
         if (value.startsWith("http://") || value.startsWith("https://")) return value
         return BASE_URL.trimEnd('/') + "/" + value.trimStart('/')
     }
+}
+
+object RetrofitClient {
+    private const val BASE_URL = "http://192.168.0.114:3000/"
+    //private const val BASE_URL = "http://10.0.2.2:3000/"
+    //private const val BASE_URL = "http://172.16.31.163:3000/"
 
     val instance: MinLishApiService by lazy {
         Retrofit.Builder()
@@ -60,4 +66,3 @@ object RetrofitClient {
             .build()
             .create(MinLishApiService::class.java)
     }
-}

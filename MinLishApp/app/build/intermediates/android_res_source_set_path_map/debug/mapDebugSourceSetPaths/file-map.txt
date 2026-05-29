@@ -1,0 +1,8 @@
+com.minlish.app-pngs-0 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\build\generated\res\pngs\debug
+com.minlish.app-updated_navigation_xml-1 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\build\generated\updated_navigation_xml\debug
+com.minlish.app-packageDebugResources-2 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.minlish.app-packageDebugResources-3 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.minlish.app-debug-4 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.minlish.app-debug-5 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\src\debug\res
+com.minlish.app-main-6 C:\Users\LENOVO\Documents\GitHub\DO_AN_MinLish_App\MinLishApp\app\src\main\res
+gradleHome-0 C:\Users\LENOVO\.gradle
