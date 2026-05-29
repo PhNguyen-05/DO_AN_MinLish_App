@@ -1,1 +1,0 @@
-SMTP credentials not provided. Forgot-password emails will fail until SMTP_USER and SMTP_PASS are set.

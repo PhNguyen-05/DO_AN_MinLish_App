@@ -1,0 +1,6 @@
+ProjectDescription.md
+minlish_db.sql
+backend/node_modules/
+.env
+.idea/
+*.log
