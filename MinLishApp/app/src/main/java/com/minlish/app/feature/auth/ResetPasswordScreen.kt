@@ -1,23 +1,14 @@
 package com.minlish.app.feature.auth
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResetPasswordScreen(
     viewModel: AuthViewModel,
@@ -29,103 +20,69 @@ fun ResetPasswordScreen(
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
     var localError by remember { mutableStateOf("") }
 
-    val primaryColor = Color(0xFF26A69A)
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    AuthPage(
+        title = "Đặt lại mật khẩu",
+        subtitle = "Nhập OTP trong email và tạo mật khẩu mới cho tài khoản.",
+        onBack = onBack
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = primaryColor)
-            }
-        }
-
-        Icon(
-            imageVector = Icons.Default.School,
-            contentDescription = "MinLish",
-            modifier = Modifier.size(80.dp),
-            tint = primaryColor
+        AuthTextField(
+            value = otp,
+            onValueChange = {
+                otp = it
+                localError = ""
+            },
+            label = "Mã OTP",
+            leadingIcon = Icons.Default.Key,
+            isError = localError.isNotBlank()
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Đặt lại mật khẩu",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = primaryColor
+        AuthPasswordField(
+            value = newPassword,
+            onValueChange = {
+                newPassword = it
+                localError = ""
+            },
+            label = "Mật khẩu mới",
+            visible = passwordVisible,
+            onVisibilityChange = { passwordVisible = !passwordVisible },
+            leadingIcon = Icons.Default.Lock,
+            isError = localError.isNotBlank()
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        AuthPasswordField(
+            value = confirmPassword,
+            onValueChange = {
+                confirmPassword = it
+                localError = ""
+            },
+            label = "Xác nhận mật khẩu",
+            visible = confirmVisible,
+            onVisibilityChange = { confirmVisible = !confirmVisible },
+            leadingIcon = Icons.Default.Lock,
+            isError = localError.isNotBlank()
+        )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = otp,
-                    onValueChange = { otp = it },
-                    label = { Text("Mã OTP") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+        AuthMessage(text = localError, isError = true)
 
-                OutlinedTextField(
-                    value = newPassword,
-                    onValueChange = { newPassword = it },
-                    label = { Text("Mật khẩu mới") },
-                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = primaryColor) },
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(if (passwordVisible) Icons.Default.Lock else Icons.Default.Lock, contentDescription = null, tint = primaryColor)
-                        }
-                    },
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    label = { Text("Xác nhận mật khẩu") },
-                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = primaryColor) },
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = {
-                        if (newPassword != confirmPassword) {
-                            localError = "Mật khẩu xác nhận không khớp"
-                            return@Button
-                        }
-                        viewModel.resetPassword(email ?: "", otp, newPassword, onSuccess = onResetSuccess) { err ->
-                            localError = err
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
-                ) {
-                    Text("Đặt lại mật khẩu", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        AuthPrimaryButton(
+            text = "Cập nhật mật khẩu",
+            loading = viewModel.resetLoading,
+            onClick = {
+                if (newPassword != confirmPassword) {
+                    localError = "Mật khẩu xác nhận không khớp."
+                    return@AuthPrimaryButton
                 }
-
-                if (localError.isNotEmpty()) {
-                    Text(localError, color = MaterialTheme.colorScheme.error)
-                }
+                viewModel.resetPassword(
+                    email = email.orEmpty(),
+                    otp = otp,
+                    newPassword = newPassword,
+                    onSuccess = onResetSuccess,
+                    onError = { localError = it }
+                )
             }
-        }
+        )
     }
 }

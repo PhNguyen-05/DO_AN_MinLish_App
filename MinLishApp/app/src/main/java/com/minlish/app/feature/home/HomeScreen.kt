@@ -1,629 +1,112 @@
-////package com.minlish.app.feature.home
-////
-////import androidx.compose.animation.*
-////import androidx.compose.foundation.layout.*
-////import androidx.compose.foundation.lazy.LazyRow
-////import androidx.compose.foundation.lazy.items
-////import androidx.compose.foundation.rememberScrollState
-////import androidx.compose.foundation.shape.CircleShape
-////import androidx.compose.foundation.shape.RoundedCornerShape
-////import androidx.compose.foundation.verticalScroll
-////import androidx.compose.material.icons.Icons
-////import androidx.compose.material.icons.filled.*
-////import androidx.compose.material3.*
-////import androidx.compose.runtime.*
-////import androidx.compose.ui.Alignment
-////import androidx.compose.ui.Modifier
-////import androidx.compose.ui.draw.clip
-////import androidx.compose.ui.graphics.Color
-////import androidx.compose.ui.layout.ContentScale
-////import androidx.compose.ui.text.font.FontWeight
-////import androidx.compose.ui.unit.dp
-////import androidx.compose.ui.unit.sp
-////import coil.compose.AsyncImage
-////import androidx.compose.ui.graphics.vector.ImageVector
-////
-////@OptIn(ExperimentalMaterial3Api::class)
-////@Composable
-////fun HomeScreen(viewModel: HomeViewModel) {
-////    LaunchedEffect(Unit) {
-////        viewModel.fetchDashboardData()
-////    }
-////
-////    val data = viewModel.dashboardState
-////    var isVisible by remember { mutableStateOf(false) }
-////
-////    LaunchedEffect(Unit) {
-////        isVisible = true
-////    }
-////
-////    Scaffold(
-////        topBar = {
-////            TopAppBar(
-////                title = { Text("MinLish", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
-////                actions = {
-////                    IconButton(onClick = { /* Navigate to Profile */ }) {
-////                        AsyncImage(
-////                            model = "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
-////                            contentDescription = "Avatar",
-////                            modifier = Modifier
-////                                .size(40.dp)
-////                                .clip(CircleShape),
-////                            contentScale = ContentScale.Crop
-////                        )
-////                    }
-////                },
-////                colors = TopAppBarDefaults.topAppBarColors(
-////                    containerColor = MaterialTheme.colorScheme.primaryContainer
-////                )
-////            )
-////        }
-////    ) { paddingValues ->
-////        Column(
-////            modifier = Modifier
-////                .fillMaxSize()
-////                .padding(paddingValues)
-////                .padding(20.dp)
-////                .verticalScroll(rememberScrollState()), // ← Cho phép cuộn xuống
-////            verticalArrangement = Arrangement.spacedBy(20.dp)
-////        ) {
-////
-////            // Greeting
-////            AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically()) {
-////                Text(
-////                    text = "Chào mừng trở lại, ${data?.full_name?.split(" ")?.first() ?: "Bạn"} 👋",
-////                    fontSize = 26.sp,
-////                    fontWeight = FontWeight.Bold
-////                )
-////            }
-////
-////            // Streak Card
-////            AnimatedStreakCard(currentStreak = data?.current_streak ?: 0)
-////
-////            // Statistics Row
-////            Row(
-////                modifier = Modifier.fillMaxWidth(),
-////                horizontalArrangement = Arrangement.spacedBy(12.dp)
-////            ) {
-////                StatCard("📚", "Từ đã học", "${data?.total_words_learned ?: 0}", modifier = Modifier.weight(1f))
-////                StatCard("🎯", "Chính xác", "${(data?.accuracy_rate?.times(100) ?: 0).toInt()}%", modifier = Modifier.weight(1f))
-////            }
-////
-////            // Daily Goal
-////            DailyGoalCard(dailyGoal = data?.daily_new_words_goal ?: 20)
-////
-////            // Quick Actions
-////            Text(
-////                text = "Hành động nhanh",
-////                fontSize = 18.sp,
-////                fontWeight = FontWeight.SemiBold
-////            )
-////            QuickActionsRow()
-////
-////            // Suggested Decks
-////            Text(
-////                text = "Bộ từ gợi ý hôm nay",
-////                fontSize = 18.sp,
-////                fontWeight = FontWeight.SemiBold
-////            )
-////            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-////                items(sampleSuggestedDecks) { deck ->
-////                    SuggestedDeckCard(deck)
-////                }
-////            }
-////
-////            Spacer(modifier = Modifier.height(40.dp))
-////        }
-////    }
-////}
-////
-////// ==================== COMPONENTS ====================
-////
-////@Composable
-////fun AnimatedStreakCard(currentStreak: Int) {
-////    Card(
-////        modifier = Modifier.fillMaxWidth(),
-////        shape = RoundedCornerShape(20.dp),
-////        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
-////    ) {
-////        Row(
-////            modifier = Modifier.padding(20.dp),
-////            verticalAlignment = Alignment.CenterVertically
-////        ) {
-////            Text("🔥", fontSize = 48.sp)
-////            Spacer(modifier = Modifier.width(16.dp))
-////            Column {
-////                Text("Chuỗi học hiện tại", fontSize = 16.sp, color = Color(0xFFEF6C00))
-////                Text(
-////                    "$currentStreak ngày liên tiếp",
-////                    fontSize = 28.sp,
-////                    fontWeight = FontWeight.Bold,
-////                    color = Color(0xFFEF6C00)
-////                )
-////            }
-////        }
-////    }
-////}
-////
-////@Composable
-////fun StatCard(icon: String, title: String, value: String, modifier: Modifier = Modifier) {
-////    Card(
-////        modifier = modifier, // Nhận modifier chia tỷ lệ từ bên ngoài ném vào
-////        shape = RoundedCornerShape(16.dp)
-////    ) {
-////        Column(
-////            modifier = Modifier.padding(16.dp).fillMaxWidth(), // Thêm fillMaxWidth để căn giữa đẹp hơn
-////            horizontalAlignment = Alignment.CenterHorizontally
-////        ) {
-////            Text(icon, fontSize = 32.sp)
-////            Spacer(modifier = Modifier.height(8.dp))
-////            Text(value, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-////            Text(title, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-////        }
-////    }
-////}
-////
-////@Composable
-////fun DailyGoalCard(dailyGoal: Int) {
-////    Card(
-////        modifier = Modifier.fillMaxWidth(),
-////        shape = RoundedCornerShape(16.dp)
-////    ) {
-////        Column(modifier = Modifier.padding(20.dp)) {
-////            Text("Mục tiêu hôm nay", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-////            Spacer(modifier = Modifier.height(12.dp))
-////            LinearProgressIndicator(
-////                progress = { 0.65f },
-////                modifier = Modifier.fillMaxWidth()
-////            )
-////            Spacer(modifier = Modifier.height(8.dp))
-////            Text("13 / $dailyGoal từ mới", color = MaterialTheme.colorScheme.onSurfaceVariant)
-////        }
-////    }
-////}
-////
-////@Composable
-////fun QuickActionsRow() {
-////    Row(
-////        modifier = Modifier.fillMaxWidth(),
-////        horizontalArrangement = Arrangement.spacedBy(12.dp)
-////    ) {
-////        QuickActionButton(
-////            icon = Icons.Default.Add,
-////            text = "Từ mới",
-////            onClick = { /* TODO */ },
-////            modifier = Modifier.weight(1f) // Truyền weight ở đây
-////        )
-////        QuickActionButton(
-////            icon = Icons.Default.Replay,
-////            text = "Ôn tập",
-////            onClick = { /* TODO */ },
-////            modifier = Modifier.weight(1f) // Truyền weight ở đây
-////        )
-////        QuickActionButton(
-////            icon = Icons.Default.Edit,
-////            text = "Luyện tập",
-////            onClick = { /* TODO */ },
-////            modifier = Modifier.weight(1f) // Truyền weight ở đây
-////        )
-////    }
-////}
-////
-////@Composable
-////fun QuickActionButton(icon: ImageVector, text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-////    OutlinedButton(
-////        onClick = onClick,
-////        modifier = modifier, // Gán modifier nhận được vào OutlinedButton
-////        shape = RoundedCornerShape(12.dp),
-////        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp) // Tránh tràn chữ trên màn hình nhỏ
-////    ) {
-////        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
-////        Spacer(modifier = Modifier.width(6.dp))
-////        Text(text, fontSize = 14.sp)
-////    }
-////}
-////
-////// Suggested Decks
-////data class SuggestedDeck(val title: String, val count: Int, val color: Color)
-////
-////val sampleSuggestedDecks = listOf(
-////    SuggestedDeck("IELTS Academic", 245, Color(0xFF4CAF50)),
-////    SuggestedDeck("Business English", 178, Color(0xFF2196F3)),
-////    SuggestedDeck("Phrasal Verbs", 92, Color(0xFFFF9800)),
-////    SuggestedDeck("TOEIC 800+", 156, Color(0xFF9C27B0))
-////)
-////
-////@Composable
-////fun SuggestedDeckCard(deck: SuggestedDeck) {
-////    Card(
-////        modifier = Modifier
-////            .width(160.dp)
-////            .height(190.dp),
-////        shape = RoundedCornerShape(16.dp),
-////        colors = CardDefaults.cardColors(containerColor = deck.color.copy(alpha = 0.12f))
-////    ) {
-////        Column(
-////            modifier = Modifier.padding(16.dp),
-////            verticalArrangement = Arrangement.spacedBy(8.dp)
-////        ) {
-////            Text("📖", fontSize = 32.sp)
-////            Text(deck.title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-////            Text("${deck.count} từ", color = MaterialTheme.colorScheme.onSurfaceVariant)
-////
-////            Button(
-////                onClick = { /* TODO */ },
-////                modifier = Modifier.fillMaxWidth(),
-////                shape = RoundedCornerShape(12.dp)
-////            ) {
-////                Text("Học ngay", fontSize = 13.sp)
-////            }
-////        }
-////    }
-////}
-//package com.minlish.app.feature.home
-//
-//import androidx.compose.animation.*
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyRow
-//import androidx.compose.foundation.lazy.items
-//import androidx.compose.foundation.rememberScrollState
-//import androidx.compose.foundation.shape.CircleShape
-//import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.foundation.verticalScroll
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.*
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.*
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.draw.clip
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.graphics.vector.ImageVector
-//import androidx.compose.ui.layout.ContentScale
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.dp
-//import androidx.compose.ui.unit.sp
-//import coil.compose.AsyncImage
-//import androidx.compose.animation.core.tween
-//
-//import com.minlish.app.data.remote.RetrofitClient
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun HomeScreen(
-//    viewModel: HomeViewModel,
-//    onProfileClick: () -> Unit = {},
-//    onImportExportClick: () -> Unit = {}
-//) {
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun HomeScreen(viewModel: HomeViewModel) {
-//    LaunchedEffect(Unit) {
-//        viewModel.fetchDashboardData()
-//    }
-//
-//    val data = viewModel.dashboardState
-//    var isVisible by remember { mutableStateOf(false) }
-//
-//    LaunchedEffect(Unit) {
-//        isVisible = true
-//    }
-//
-//    val primaryColor = Color(0xFF26A69A)     // Teal theo logo
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text("MinLish", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
-//                actions = {
-//
-//                    IconButton(onClick = onProfileClick) {
-//                        AsyncImage(
-//                            model = RetrofitClient.resolveServerUrl(data?.avatar_url)
-//                                ?: "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
-//                    IconButton(onClick = { /* Navigate to Profile */ }) {
-//                        AsyncImage(
-//                            model = "https://i.pravatar.cc/150?u=${data?.full_name ?: "user"}",
-//                            contentDescription = "Avatar",
-//                            modifier = Modifier
-//                                .size(40.dp)
-//                                .clip(CircleShape),
-//                            contentScale = ContentScale.Crop
-//                        )
-//                    }
-//                },
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = primaryColor.copy(alpha = 0.1f)
-//                )
-//            )
-//        }
-//    ) { paddingValues ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//                .padding(20.dp)
-//                .verticalScroll(rememberScrollState()),
-//            verticalArrangement = Arrangement.spacedBy(20.dp)
-//        ) {
-//
-//            // Greeting với animation
-//            AnimatedVisibility(
-//                visible = isVisible,
-//                enter = fadeIn(animationSpec = tween(600)) + slideInVertically(animationSpec = tween(600))
-//            ) {
-//                Text(
-//                    text = "Chào mừng trở lại, ${data?.full_name?.split(" ")?.first() ?: "Bạn"} 👋",
-//                    fontSize = 26.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    color = primaryColor
-//                )
-//            }
-//
-//            // Streak Card
-//            AnimatedStreakCard(currentStreak = data?.current_streak ?: 0)
-//
-//            // Statistics
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp)
-//            ) {
-//                StatCard("📚", "Từ đã học", "${data?.total_words_learned ?: 0}", modifier = Modifier.weight(1f))
-//                StatCard("🎯", "Chính xác", "${(data?.accuracy_rate?.times(100) ?: 0).toInt()}%", modifier = Modifier.weight(1f))
-//            }
-//
-//            // Daily Goal
-//            DailyGoalCard(dailyGoal = data?.daily_new_words_goal ?: 20)
-//
-//            // Quick Actions
-//            Text("Hành động nhanh", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-//
-//            QuickActionsRow(onImportExportClick = onImportExportClick)
-//
-//            QuickActionsRow()
-//
-//
-//            // Continue Learning
-//            Text("Tiếp tục học", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-//            ContinueLearningCard()
-//
-//            // Suggested Decks
-//            Text("Bộ từ gợi ý hôm nay", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-//            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-//                items(sampleSuggestedDecks) { deck ->
-//                    SuggestedDeckCard(deck)
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(40.dp))
-//        }
-//    }
-//}
-//
-//// ==================== COMPONENTS ====================
-//
-//@Composable
-//fun AnimatedStreakCard(currentStreak: Int) {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(20.dp),
-//        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
-//        elevation = CardDefaults.cardElevation(6.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier.padding(20.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Text("🔥", fontSize = 48.sp)
-//            Spacer(modifier = Modifier.width(16.dp))
-//            Column {
-//                Text("Chuỗi học hiện tại", fontSize = 16.sp, color = Color(0xFFEF6C00))
-//                Text(
-//                    "$currentStreak ngày liên tiếp",
-//                    fontSize = 28.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    color = Color(0xFFEF6C00)
-//                )
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//fun StatCard(icon: String, title: String, value: String, modifier: Modifier = Modifier) {
-//    Card(
-//        modifier = modifier, // Sửa từ Modifier.weight(1f) thành modifier nhận từ cha
-//        shape = RoundedCornerShape(16.dp),
-//        elevation = CardDefaults.cardElevation(4.dp)
-//    ) {
-//        Column(
-//            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(icon, fontSize = 32.sp)
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text(value, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-//            Text(title, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-//        }
-//    }
-//}
-//
-//@Composable
-//fun DailyGoalCard(dailyGoal: Int) {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(16.dp),
-//        elevation = CardDefaults.cardElevation(4.dp)
-//    ) {
-//        Column(modifier = Modifier.padding(20.dp)) {
-//            Text("Mục tiêu hôm nay", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-//            Spacer(modifier = Modifier.height(12.dp))
-//            LinearProgressIndicator(
-//                progress = { 0.65f },
-//                modifier = Modifier.fillMaxWidth(),
-//                color = Color(0xFF26A69A)
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text("13 / $dailyGoal từ mới", color = MaterialTheme.colorScheme.onSurfaceVariant)
-//        }
-//    }
-//}
-//
-//@Composable
-//
-//fun QuickActionsRow(onImportExportClick: () -> Unit) {
-//fun QuickActionsRow() {
-//
-//    Row(
-//        modifier = Modifier.fillMaxWidth(),
-//        horizontalArrangement = Arrangement.spacedBy(12.dp)
-//    ) {
-//        // Truyền quyền chia tỷ lệ trực tiếp tại đây
-//
-//        QuickActionButton(Icons.Default.UploadFile, "Import", onClick = onImportExportClick, modifier = Modifier.weight(1f))
-//        QuickActionButton(Icons.Default.Add, "Từ mới", modifier = Modifier.weight(1f))
-//        QuickActionButton(Icons.Default.Replay, "Ôn tập", modifier = Modifier.weight(1f))
-//        QuickActionButton(Icons.Default.Edit, "Luyện tập", modifier = Modifier.weight(1f))
-//    }
-//}
-//
-//@Composable
-//
-//fun QuickActionButton(
-//    icon: ImageVector,
-//    text: String,
-//    onClick: () -> Unit = {},
-//    modifier: Modifier = Modifier
-//) {
-//    val primaryColor = Color(0xFF26A69A)
-//    OutlinedButton(
-//        onClick = onClick,
-//fun QuickActionButton(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
-//    val primaryColor = Color(0xFF26A69A)
-//    OutlinedButton(
-//        onClick = { /* TODO */ },
-//        modifier = modifier, // Gán modifier nhận từ scope Row của cha vào đây
-//        shape = RoundedCornerShape(12.dp),
-//        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp) // Chống tràn chữ trên màn hình hẹp
-//    ) {
-//        Icon(icon, contentDescription = null, tint = primaryColor, modifier = Modifier.size(20.dp))
-//        Spacer(modifier = Modifier.width(6.6.dp))
-//        Text(text, fontSize = 14.sp)
-//    }
-//}
-//
-//@Composable
-//fun ContinueLearningCard() {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(16.dp),
-//        elevation = CardDefaults.cardElevation(4.dp)
-//    ) {
-//        Column(modifier = Modifier.padding(20.dp)) {
-//            Text("📌 Đang học: Business English", fontWeight = FontWeight.SemiBold)
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text("Bạn đã học 12/30 từ trong bộ này", fontSize = 14.sp)
-//            Spacer(modifier = Modifier.height(12.dp))
-//            Button(
-//                onClick = { /* TODO: Navigate to learning screen */ },
-//                modifier = Modifier.fillMaxWidth(),
-//                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A69A))
-//            ) {
-//                Text("Tiếp tục học ngay")
-//            }
-//        }
-//    }
-//}
-//
-//// Suggested Decks
-//data class SuggestedDeck(val title: String, val count: Int, val color: Color)
-//
-//val sampleSuggestedDecks = listOf(
-//    SuggestedDeck("IELTS Academic", 245, Color(0xFF4CAF50)),
-//    SuggestedDeck("Business English", 178, Color(0xFF2196F3)),
-//    SuggestedDeck("Phrasal Verbs", 92, Color(0xFFFF9800)),
-//    SuggestedDeck("TOEIC 800+", 156, Color(0xFF9C27B0))
-//)
-//
-//@Composable
-//fun SuggestedDeckCard(deck: SuggestedDeck) {
-//    Card(
-//        modifier = Modifier
-//            .width(160.dp)
-//            .height(190.dp),
-//        shape = RoundedCornerShape(16.dp),
-//        colors = CardDefaults.cardColors(containerColor = deck.color.copy(alpha = 0.12f)),
-//        elevation = CardDefaults.cardElevation(4.dp)
-//    ) {
-//        Column(
-//            modifier = Modifier.padding(16.dp),
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            Text("📖", fontSize = 32.sp)
-//            Text(deck.title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-//            Text("${deck.count} từ", color = MaterialTheme.colorScheme.onSurfaceVariant)
-//
-//            Button(
-//                onClick = { /* TODO */ },
-//                modifier = Modifier.fillMaxWidth(),
-//                shape = RoundedCornerShape(12.dp),
-//                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A69A))
-//            ) {
-//                Text("Học ngay", fontSize = 13.sp)
-//            }
-//        }
-//    }
-
-
 package com.minlish.app.feature.home
 
-import androidx.compose.animation.*
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
+import com.minlish.app.data.model.LearningDeckSummary
+import com.minlish.app.data.model.NotificationSummaryResponse
 import com.minlish.app.data.remote.RetrofitClient
+import com.minlish.app.feature.notification.NotificationScheduler
+import com.minlish.app.feature.notification.ReminderPreferences
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     onProfileClick: () -> Unit = {},
-    onImportExportClick: () -> Unit = {}
+    onImportExportClick: () -> Unit = {},
+    onLearningClick: (Long?, String?) -> Unit = { _, _ -> }
 ) {
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         viewModel.fetchDashboardData()
     }
 
     val data = viewModel.dashboardState
+    val learningPlan = viewModel.learningPlanState
+    val learningDecks = viewModel.learningDecksState
+
+    LaunchedEffect(learningPlan) {
+        learningPlan?.let { plan ->
+            ReminderPreferences.updateStudyStats(
+                context,
+                wordsLearnedToday = plan.words_learned_today,
+                wordsReviewedToday = plan.words_reviewed_today,
+                dueReviewCount = plan.due_review_count
+            )
+        }
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
     var isVisible by remember { mutableStateOf(false) }
+    val primaryColor = Color(0xFF26A69A)
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.fetchDashboardData()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(Unit) {
         isVisible = true
     }
 
-    val primaryColor = Color(0xFF26A69A)     // Teal theo logo
-
     Scaffold(
+        containerColor = Color(0xFFF5FAF8),
         topBar = {
             TopAppBar(
                 title = { Text("MinLish", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
@@ -641,7 +124,8 @@ fun HomeScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = primaryColor.copy(alpha = 0.1f)
+                    containerColor = Color(0xFFF5FAF8),
+                    titleContentColor = Color(0xFF102522)
                 )
             )
         }
@@ -654,79 +138,150 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Greeting với animation
             AnimatedVisibility(
                 visible = isVisible,
                 enter = fadeIn(animationSpec = tween(600)) + slideInVertically(animationSpec = tween(600))
             ) {
-                Text(
-                    text = "Chào mừng trở lại, ${data?.full_name?.split(" ")?.first() ?: "Bạn"} 👋",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = primaryColor
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = "Chào mừng trở lại, ${data?.full_name?.split(" ")?.first() ?: "Bạn"}",
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF102522)
+                    )
+                    Text(
+                        text = "Một phiên học nhỏ hôm nay là đủ giữ nhịp.",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            // Streak Card
             AnimatedStreakCard(currentStreak = data?.current_streak ?: 0)
 
-            // Statistics
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatCard("📚", "Từ đã học", "${data?.total_words_learned ?: 0}", modifier = Modifier.weight(1f))
-                StatCard("🎯", "Chính xác", "${(data?.accuracy_rate?.times(100) ?: 0).toInt()}%", modifier = Modifier.weight(1f))
+                StatCard("🎯", "Chính xác", "${(data?.accuracy_rate?.times(100) ?: 0f).toInt()}%", modifier = Modifier.weight(1f))
             }
 
-            // Daily Goal
-            DailyGoalCard(dailyGoal = data?.daily_new_words_goal ?: 20)
+            DailyGoalCard(
+                dailyGoal = learningPlan?.daily_new_words_goal ?: data?.daily_new_words_goal ?: 20,
+                learnedToday = learningPlan?.words_learned_today ?: 0,
+                dailyReviewGoal = learningPlan?.daily_review_goal ?: 50,
+                reviewedToday = learningPlan?.words_reviewed_today ?: 0,
+                dueReviewCount = learningPlan?.due_review_count ?: 0
+            )
 
-            // Quick Actions
             Text("Hành động nhanh", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            QuickActionsRow(onImportExportClick = onImportExportClick)
+            QuickActionsRow(
+                onImportExportClick = onImportExportClick,
+                onLearningClick = { mode -> onLearningClick(null, mode) }
+            )
 
-            // Continue Learning
             Text("Tiếp tục học", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            ContinueLearningCard()
+            ContinueLearningCard(
+                deck = learningDecks.continue_deck,
+                onLearningClick = { deckId -> onLearningClick(deckId, null) }
+            )
 
-            // Suggested Decks
-            Text("Bộ từ gợi ý hôm nay", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(sampleSuggestedDecks) { deck ->
-                    SuggestedDeckCard(deck)
-                }
-            }
+            SuggestedDeckSection(
+                decks = learningDecks.decks,
+                onLearningClick = { deckId -> onLearningClick(deckId, null) }
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }
 
-// ==================== COMPONENTS ====================
-
 @Composable
 fun AnimatedStreakCard(currentStreak: Int) {
+    val animatedStreak by animateIntAsState(
+        targetValue = currentStreak,
+        animationSpec = tween(durationMillis = 700),
+        label = "streakCounter"
+    )
+    val shine by rememberInfiniteTransition(label = "streakShine").animateFloat(
+        initialValue = -0.25f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "streakShineOffset"
+    )
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
-        elevation = CardDefaults.cardElevation(6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(18.dp),
+                ambientColor = Color(0xFFFF8A65).copy(alpha = 0.18f),
+                spotColor = Color(0xFFFF8A65).copy(alpha = 0.18f)
+            ),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("🔥", fontSize = 48.sp)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text("Chuỗi học hiện tại", fontSize = 16.sp, color = Color(0xFFEF6C00))
-                Text(
-                    "$currentStreak ngày liên tiếp",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFEF6C00)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFFFF1D8),
+                            Color(0xFFFFE3D7),
+                            Color(0xFFE4F8F2)
+                        )
+                    )
                 )
+        ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer { translationX = 360f * shine }
+                    .background(
+                        Brush.linearGradient(
+                            listOf(
+                                Color.White.copy(alpha = 0f),
+                                Color.White.copy(alpha = 0.32f),
+                                Color.White.copy(alpha = 0f)
+                            )
+                        )
+                    )
+            )
+            Row(
+                modifier = Modifier.padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    modifier = Modifier.size(58.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White.copy(alpha = 0.72f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text("🔥", fontSize = 34.sp)
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text("Chuỗi học hiện tại", fontSize = 15.sp, color = Color(0xFF8B4B00))
+                    Text(
+                        "$animatedStreak ngày liên tiếp",
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF552C00)
+                    )
+                    Text(
+                        "Giữ nhịp đều để từ vựng ở lại lâu hơn.",
+                        fontSize = 13.sp,
+                        color = Color(0xFF7C5B41)
+                    )
+                }
             }
         }
     }
@@ -734,16 +289,28 @@ fun AnimatedStreakCard(currentStreak: Int) {
 
 @Composable
 fun StatCard(icon: String, title: String, value: String, modifier: Modifier = Modifier) {
+    val scale by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(durationMillis = 400),
+        label = "statScale"
+    )
+
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = modifier.graphicsLayer(scaleX = scale, scaleY = scale),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp),
+        border = BorderStroke(1.dp, Color(0xFFE7ECEA))
     ) {
         Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(14.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(icon, fontSize = 32.sp)
+            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFFE8F6F3)) {
+                Text(icon, fontSize = 26.sp, modifier = Modifier.padding(8.dp))
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(value, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Text(title, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -752,36 +319,85 @@ fun StatCard(icon: String, title: String, value: String, modifier: Modifier = Mo
 }
 
 @Composable
-fun DailyGoalCard(dailyGoal: Int) {
+fun DailyGoalCard(
+    dailyGoal: Int,
+    learnedToday: Int,
+    dailyReviewGoal: Int,
+    reviewedToday: Int,
+    dueReviewCount: Int
+) {
+    val newProgress = (learnedToday.toFloat() / dailyGoal.coerceAtLeast(1)).coerceIn(0f, 1f)
+    val reviewProgress = (reviewedToday.toFloat() / dailyReviewGoal.coerceAtLeast(1)).coerceIn(0f, 1f)
+    val animatedNewProgress by animateFloatAsState(
+        targetValue = newProgress,
+        animationSpec = tween(durationMillis = 650),
+        label = "newWordsProgress"
+    )
+    val animatedReviewProgress by animateFloatAsState(
+        targetValue = reviewProgress,
+        animationSpec = tween(durationMillis = 650),
+        label = "reviewProgress"
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp),
+        border = BorderStroke(1.dp, Color(0xFFE7ECEA))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text("Mục tiêu hôm nay", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Mục tiêu hôm nay", modifier = Modifier.weight(1f), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                Surface(shape = RoundedCornerShape(999.dp), color = Color(0xFFE8F6F3)) {
+                    Text(
+                        "${((newProgress + reviewProgress) / 2f * 100).toInt()}%",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        color = Color(0xFF147A70),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(12.dp))
+            Text("Từ mới", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(6.dp))
             LinearProgressIndicator(
-                progress = { 0.65f },
+                progress = { animatedNewProgress },
                 modifier = Modifier.fillMaxWidth(),
                 color = Color(0xFF26A69A)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("13 / $dailyGoal từ mới", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("$learnedToday / $dailyGoal từ mới", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Ôn tập", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(6.dp))
+            LinearProgressIndicator(
+                progress = { animatedReviewProgress },
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF5E7CE2)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "$reviewedToday / $dailyReviewGoal thẻ ôn, $dueReviewCount thẻ đang đến hạn",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
 
+// NotificationReminderCard was moved to Profile & Settings screen.
+
 @Composable
-fun QuickActionsRow(onImportExportClick: () -> Unit) {
+fun QuickActionsRow(onImportExportClick: () -> Unit, onLearningClick: (String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         QuickActionButton(Icons.Default.UploadFile, "Import", onClick = onImportExportClick, modifier = Modifier.weight(1f))
-        QuickActionButton(Icons.Default.Add, "Từ mới", modifier = Modifier.weight(1f))
-        QuickActionButton(Icons.Default.Replay, "Ôn tập", modifier = Modifier.weight(1f))
-        QuickActionButton(Icons.Default.Edit, "Luyện tập", modifier = Modifier.weight(1f))
+        QuickActionButton(Icons.Default.Add, "Từ mới", onClick = { onLearningClick("new") }, modifier = Modifier.weight(1f))
+        QuickActionButton(Icons.Default.Replay, "Ôn tập", onClick = { onLearningClick("review") }, modifier = Modifier.weight(1f))
+        QuickActionButton(Icons.Default.Edit, "Luyện tập", onClick = { onLearningClick("mixed") }, modifier = Modifier.weight(1f))
     }
 }
 
@@ -789,80 +405,283 @@ fun QuickActionsRow(onImportExportClick: () -> Unit) {
 fun QuickActionButton(
     icon: ImageVector,
     text: String,
-    onClick: () -> Unit = {},
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFF26A69A)
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier
+            .height(54.dp)
+            .shadow(4.dp, RoundedCornerShape(12.dp), ambientColor = Color(0xFF9ECAC1).copy(alpha = 0.12f)),
         shape = RoundedCornerShape(12.dp),
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFD6E5E0)),
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = primaryColor, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(text, fontSize = 14.sp)
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Icon(icon, contentDescription = null, tint = Color(0xFF26A69A), modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
 @Composable
-fun ContinueLearningCard() {
+fun ContinueLearningCard(deck: LearningDeckSummary?, onLearningClick: (Long?) -> Unit) {
+    val progress = if (deck == null) 0f else {
+        (deck.learned_words.toFloat() / deck.total_words.coerceAtLeast(1)).coerceIn(0f, 1f)
+    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 650),
+        label = "continueDeckProgress"
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp),
+        border = BorderStroke(1.dp, Color(0xFFDDEBE7))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text("📌 Đang học: Business English", fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Bạn đã học 12/30 từ trong bộ này", fontSize = 14.sp)
+            if (deck == null) {
+                Text("Không có bộ đang học dở", fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Bạn đã hoàn thành các bộ đang học. Chọn một bộ khác bên dưới để bắt đầu.", fontSize = 14.sp)
+            } else {
+                Text("Đang học: ${deck.title}", fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Bạn đã học ${deck.learned_words}/${deck.total_words} từ trong bộ này.", fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "Còn ${(deck.total_words - deck.learned_words).coerceAtLeast(0)} từ mới.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color(0xFF26A69A),
+                    trackColor = Color(0xFFE4EEEA)
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
             Button(
-                onClick = { /* TODO: Navigate to learning screen */ },
+                onClick = { onLearningClick(deck?.id) },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A69A))
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A69A), contentColor = Color.White)
             ) {
-                Text("Tiếp tục học ngay")
+                Text(if (deck == null) "Học bộ khác" else "Tiếp tục học ngay")
             }
         }
     }
 }
 
-data class SuggestedDeck(val title: String, val count: Int, val color: Color)
-
-val sampleSuggestedDecks = listOf(
-    SuggestedDeck("IELTS Academic", 245, Color(0xFF4CAF50)),
-    SuggestedDeck("Business English", 178, Color(0xFF2196F3)),
-    SuggestedDeck("Phrasal Verbs", 92, Color(0xFFFF9800)),
-    SuggestedDeck("TOEIC 800+", 156, Color(0xFF9C27B0))
-)
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SuggestedDeckCard(deck: SuggestedDeck) {
-    Card(
-        modifier = Modifier
-            .width(160.dp)
-            .height(190.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = deck.color.copy(alpha = 0.12f)),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text("📖", fontSize = 32.sp)
-            Text(deck.title, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-            Text("${deck.count} từ", color = MaterialTheme.colorScheme.onSurfaceVariant)
+fun SuggestedDeckSection(decks: List<LearningDeckSummary>, onLearningClick: (Long) -> Unit) {
+    val pageSize = 2
+    val sortedDecks = remember(decks) {
+        decks.sortedWith(
+            compareBy<LearningDeckSummary> { it.is_completed }
+                .thenByDescending { it.is_in_progress }
+                .thenByDescending { it.due_review_count }
+                .thenBy { it.id }
+        )
+    }
+    val pageCount = ((sortedDecks.size + pageSize - 1) / pageSize).coerceAtLeast(1)
+    val pagerState = rememberPagerState(pageCount = { pageCount })
+    val coroutineScope = rememberCoroutineScope()
 
-            Button(
-                onClick = { /* TODO */ },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF26A69A))
+    LaunchedEffect(decks.size, pageCount) {
+        if (pagerState.currentPage > pageCount - 1) {
+            pagerState.scrollToPage(pageCount - 1)
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Bộ từ gợi ý hôm nay",
+                modifier = Modifier.weight(1f),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            IconButton(
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } },
+                enabled = pagerState.currentPage > 0,
+                modifier = Modifier.size(36.dp)
             ) {
-                Text("Học ngay", fontSize = 13.sp)
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Trang trước")
+            }
+            Text(
+                "${pagerState.currentPage + 1}/$pageCount",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            IconButton(
+                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
+                enabled = pagerState.currentPage < pageCount - 1,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Trang sau")
+            }
+        }
+
+        if (sortedDecks.isEmpty()) {
+            EmptySuggestedDeckCard()
+        } else {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth(),
+                pageSpacing = 12.dp
+            ) { page ->
+                val pageDecks = sortedDecks.drop(page * pageSize).take(pageSize)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    pageDecks.forEach { deck ->
+                        SuggestedDeckCard(
+                            deck = deck,
+                            onLearningClick = { onLearningClick(deck.id) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    repeat(pageSize - pageDecks.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+fun EmptySuggestedDeckCard() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFE7ECEA)),
+        elevation = CardDefaults.cardElevation(1.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Chưa có bộ từ nào để gợi ý.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+        }
+    }
+}
+
+@Composable
+fun SuggestedDeckCard(
+    deck: LearningDeckSummary,
+    onLearningClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val accent = deckAccentColor(deck.id)
+    val remaining = (deck.total_words - deck.learned_words).coerceAtLeast(0)
+    val progress = (deck.learned_words.toFloat() / deck.total_words.coerceAtLeast(1)).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 600),
+        label = "deckProgress"
+    )
+    val actionText = when {
+        deck.due_review_count > 0 -> "Ôn ngay"
+        deck.is_completed -> "Đã xong"
+        else -> "Học ngay"
+    }
+
+    Card(
+        modifier = modifier
+            .height(218.dp)
+            .shadow(5.dp, RoundedCornerShape(14.dp), ambientColor = accent.copy(alpha = 0.10f)),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.25f)),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(shape = RoundedCornerShape(10.dp), color = accent.copy(alpha = 0.12f)) {
+                    Text("📖", modifier = Modifier.padding(7.dp), fontSize = 20.sp)
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (deck.is_in_progress && !deck.is_completed) {
+                    Surface(shape = RoundedCornerShape(999.dp), color = Color(0xFFE8F6F3)) {
+                        Text(
+                            "Đang học",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            color = Color(0xFF147A70),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = deck.title,
+                modifier = Modifier.height(38.dp),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text("${deck.total_words} từ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = if (deck.is_completed) "Hoàn thành" else "Còn $remaining từ",
+                color = if (deck.is_completed) Color(0xFF26A69A) else MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+                maxLines = 1
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(999.dp)),
+                color = accent,
+                trackColor = accent.copy(alpha = 0.12f)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                onClick = onLearningClick,
+                enabled = !deck.is_completed || deck.due_review_count > 0,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF26A69A),
+                    contentColor = Color.White,
+                    disabledContainerColor = Color(0xFFE7ECEA),
+                    disabledContentColor = Color(0xFF60706C)
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                Text(actionText, fontSize = 13.sp, maxLines = 1)
+            }
+        }
+    }
+}
+
+private fun deckAccentColor(deckId: Long): Color {
+    val colors = listOf(
+        Color(0xFF26A69A),
+        Color(0xFF5E7CE2),
+        Color(0xFF7E57C2),
+        Color(0xFFEF6C00),
+        Color(0xFF43A047)
+    )
+    return colors[(deckId % colors.size).toInt()]
 }

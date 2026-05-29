@@ -32,8 +32,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8517aa98-9788-44cf-81c2-d8dee150dd35" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.4.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.4.1/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.4.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.4.1/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/9.4.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.4.1/fileHashes/fileHashes.bin" afterDir="false" />
@@ -42,9 +40,9 @@
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/apk/debug/app-debug.apk" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/apk/debug/app-debug.apk" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/apk/debug/output-metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/apk/debug/output-metadata.json" afterDir="false" />
@@ -53,38 +51,152 @@
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/ComposableSingletons$MainActivityKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/ComposableSingletons$MainActivityKt.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/MainActivity.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/MainActivity.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/MainActivityKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/MainActivityKt.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/AuthResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/AuthResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/DashboardResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/DashboardResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/RegisterRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/RegisterRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/UserInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/model/UserInfo.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/remote/MinLishApiService.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/remote/MinLishApiService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/remote/RetrofitClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/data/remote/RetrofitClient.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel$login$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel$login$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel$register$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel$register$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel$register$1.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/AuthViewModel.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/ComposableSingletons$LoginScreenKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/ComposableSingletons$LoginScreenKt.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/ComposableSingletons$RegisterScreenKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/ComposableSingletons$RegisterScreenKt.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/LoginScreenKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/LoginScreenKt.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/RegisterScreenKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/auth/RegisterScreenKt.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/ComposableSingletons$HomeScreenKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/ComposableSingletons$HomeScreenKt.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$1$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$2$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$2.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$3.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$4.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeScreenKt.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/SuggestedDeck.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/SuggestedDeck.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeViewModel$fetchDashboardData$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeViewModel$fetchDashboardData$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeViewModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/HomeViewModel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/feature/home/SuggestedDeck.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/ui/theme/ColorKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/ui/theme/ColorKt.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/ui/theme/ThemeKt.class" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/com/minlish/app/ui/theme/ThemeKt.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/compatible_screen_manifest/debug/createDebugCompatibleScreenManifests/output-metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/compatible_screen_manifest/debug/createDebugCompatibleScreenManifests/output-metadata.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/compile_and_runtime_r_class_jar/debug/processDebugResources/R.jar" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/compile_and_runtime_r_class_jar/debug/processDebugResources/R.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/dirs_bucket_8/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/dirs_bucket_9/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_0/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_1/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_2/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_3/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_4/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_5/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_6/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_7/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_8/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/currentProject/jar_96054f65dc61bcc7f7bd6082542e0f53cd976929c12c63e04ebfe488e29ff508_bucket_9/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/externalLibs/dirs_bucket_8/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/externalLibs/dirs_bucket_9/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/mixedScopes/dirs_bucket_8/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/mixedScopes/dirs_bucket_9/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/otherProjects/dirs_bucket_8/graph.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/desugar_graph/debug/dexBuilderDebug/out/otherProjects/dirs_bucket_9/graph.bin" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/12/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/12/classes.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/13/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/13/classes.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/14/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/14/classes.dex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/15/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/15/classes.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/4/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/4/classes.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/6/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex/debug/mergeProjectDexDebug/6/classes.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex_archive_input_jar_hashes/debug/dexBuilderDebug/out" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex_archive_input_jar_hashes/debug/dexBuilderDebug/out" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/dex_number_of_buckets_file/debug/dexBuilderDebug/out" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/dex_number_of_buckets_file/debug/dexBuilderDebug/out" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/merge-state" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/merge-state" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/+SxL0O8V6Dzz7O7oNz7igA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/+WQODxHEusedGbtbrlvc0A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/0_kTpWC6lnKFB_x1EUgTig==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/16azJT_CbNVLLmgPg7Xn1w==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/1bav7NsBRY92wnpaX_nDzw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/2uLfdNKUe_za2X81l91Dng==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/3umEUlWINU+CZ5nFNX0grw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/4s9VVLKZZySddM1ryTtSYw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/6Dcz0zo8jHO4CeLu4zXIJA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/6NL1W6IfIaZ6Y4PhNz6IJw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/6iifikDuMRdi8rMtWysdLA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/78yQ1XnJOGE9pYYZ2qMr5Q==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/7ALQyZoZiJH02XwUw9_SPQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/BFXOAkLn1R47lJprLcavrg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/BP7duUmOLZNNK_2t9mZGEg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/CBpywds6Xw3SnhLM5ysX_g==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/CigBeBZIAdIHWg8Bi28lkw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/CpSMAlRtQSHYQ+ZpAVF84A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/DMwuTSjj_ewc2Ccp+Scv7w==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/DspmiNKX7N2TbUWmBKhC2Q==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ELG4VTzGcuBIWSaEYdhnvg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/FD1u0_ZiHO4AdtWMMnd6Pw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/FOKYLYEz3HU4v33iZ9zPWQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/FYMhUgJMBgyAW3dSnkKdQA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/FbqeMjixN1NQt3RZJgdRzw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/G3UG4VTtzssoFfF0R40nMQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/GGgskKhPBA63YvmYFZgtUA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/GLZq3FMROsQlNImAoeu0ZA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/GsoDhocD5UPOsyNLIzGYig==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/HdtDoEQ4myzaeIrWVC1ivw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/IuPYQ7aUAOrT9PaOrdHpXQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/J7tTFdadQYrSzfNRrCznbQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/JY4iF+Z8IO6BodvkqWjd6w==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Jc1pVTMNKBIZrLJtMAnuZw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/JdicNODmahxfHkN+lDIxAQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/KJXVSUKnQAuoNQFo5_BKKQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/KhFSUFObRa7RN8Fl1wT8_A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/KnSssW6lXDSg3_ERD3hT9g==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/L+7Mf3llO_+UFIOGcmUX4A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/L+UmUjfuEQ9NZWQ4Iq1FHQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/LUybmZWLkBPBje3Z9gWwPQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/LbPyKo+i+Yew1utn+S94mw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/MAiGjmXTOA6WfxCDYREKKA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/MLKA2cko7W+lwYVQ3kfa0g==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/MUuVlyzuFT5pqCF1J_5Fxw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/NAby5Df9_5FhkSSghD+QwQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/OAO5BJqKNKUPyLPT1TciqQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/OLIQhZN2EIvO8IcIt0cy4Q==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/Oa8EmdC5WvfI36bQ3qh3mg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/PFdS1WXtTjCpAbsB1bkfwg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/QXYy7uqN+KOZUtBJQvysCA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/QdBRlm0VAIM3VlFe0zJT7A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/R7DbX10c_Cge9lp84ujBpQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/SF_dwL_HOteOZfydjJ9DzA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/SUqkZg9no_qPzNBAu456JQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/SaU+tY0sHH35ScRIfnJH8A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/TIWNjP1ta1eJrcTUmmdg_A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/VGk+1tlxP1XAPzKHtoY9FA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/YWItnG1EvYzWWlpVo6qlbA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/_ernULFIQ7Axwdd6jzUeZw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/agiuXaPyfD65j54AVgU6vw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ajdW8IRlpuJf7nOG+KeDyg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/bP+ha+dk1wsl2jVjl5bfDg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/btAziWrm0RrmlFvnZaBbkQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/bxEkwAv0OE8FLLKXqDtkpg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/c3kzEz9Jn87K8wk8DH3u5Q==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ceHZuerV2l7OjEb+PIYG9w==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/dlNQBAqvrzxsI0e0ArmEag==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/eQeg_Ko2BgJszUTP70Q6bw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ei40mUOqVa5r0m5RjQIv9g==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ff_5vABgC4Iqu1UQGmUKzg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/fynak_CF+4uriMtaQ5eKOA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/g+2Xl4fdBk5kteCe8QtXow==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/gifoAxigENthd2TH444j6A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/gqMjBRh5DA4vlSidHlq2xw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/gxAxe8jHXdriN1VdxF2qRw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/hrS1RlgODZUwhSfbwqNrsg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/htyNey1Gey+iCvYScTyfVg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/hywXHPgcE7nLvvSceiJ+tA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/i1on18WXnuF+2vOEk7foEA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/iP4pNJk3jTdBizqBT8nW6w==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/ifIv0VU5mKBAAHrLQwdChA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/lCoAuhgH6dLkjFRAC1eT2A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/m2iLAQm0_7kA2tupOZtGUw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/mAMnBq8nVHdGbwianbD_qw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/nF1a5kOJzD+qZKvvK71oXQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/nY79kBpPNpg1VF_leaZNQA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/nor_EsfG9Ck+FJuh2JnhBQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/otNu_fV49+feVcMTDnt81Q==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/rDK4J9X3wZynQk2YSmlr6g==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/splzdV6J4_l1X+H5utRdww==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/t1XWEUqB_pJ2k53tLoYzAA==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/t1bPFL4nnwe2AkNz1DPaFQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/t_S0VZTD2L1ZrKad_KUJ+A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/uZKNuTinOa_pzlqukTTHoQ==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/v4l0bejkhBuPG0YzwwOx6A==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/vy58Rq_NDbf5Iyy3Fz9Ozw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/xWi+pwiayBp7rKWR6M0jSg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/xoqH55OXPIGTZyLpFSlblw==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/xxVVfuVquEO7D4Osu+yZlg==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/yXBkPq4tagFRxfBlk_uq3g==" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug-mergeJavaRes/zip-cache/zTfBtTzQVmftXc09SwHaFQ==" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug/mergeDebugResources/compile-file-map.properties" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/incremental/debug/mergeDebugResources/compile-file-map.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-af/values-af.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-af/values-af.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-am/values-am.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/incremental/debug/mergeDebugResources/merged.dir/values-am/values-am.xml" afterDir="false" />
@@ -283,38 +395,22 @@
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/ComposableSingletons$MainActivityKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/ComposableSingletons$MainActivityKt.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/MainActivity.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/MainActivity.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/MainActivityKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/MainActivityKt.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/AuthResponse.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/AuthResponse.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/DashboardResponse.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/DashboardResponse.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/RegisterRequest.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/RegisterRequest.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/UserInfo.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/model/UserInfo.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/remote/MinLishApiService.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/remote/MinLishApiService.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/remote/RetrofitClient.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/data/remote/RetrofitClient.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel$login$1.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel$login$1.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel$register$1.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel$register$1.dex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel$register$1.dex" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/AuthViewModel.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/ComposableSingletons$LoginScreenKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/ComposableSingletons$LoginScreenKt.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/ComposableSingletons$RegisterScreenKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/ComposableSingletons$RegisterScreenKt.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/LoginScreenKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/LoginScreenKt.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/RegisterScreenKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/auth/RegisterScreenKt.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/ComposableSingletons$HomeScreenKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/ComposableSingletons$HomeScreenKt.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$1$1.dex" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$2$1.dex" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$1.dex" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$2.dex" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$3.dex" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt$HomeScreen$lambda$16$lambda$15$lambda$14$lambda$13$$inlined$items$default$4.dex" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeScreenKt.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/SuggestedDeck.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/SuggestedDeck.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_4.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_6.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_7.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_8.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/f0749633a5706fc30eac7b5cee2ac3628d2c65065bb319bd4fdb473f21cff164_9.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeViewModel$fetchDashboardData$1.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeViewModel$fetchDashboardData$1.dex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeViewModel.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/HomeViewModel.dex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/feature/home/SuggestedDeck.dex" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/ui/theme/ColorKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/ui/theme/ColorKt.dex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/ui/theme/ThemeKt.dex" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/project_dex_archive/debug/dexBuilderDebug/out/com/minlish/app/ui/theme/ThemeKt.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/runtime_symbol_list/debug/processDebugResources/R.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/stable_resource_ids_file/debug/processDebugResources/stableIds.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/stable_resource_ids_file/debug/processDebugResources/stableIds.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt" afterDir="false" />
@@ -346,6 +442,7 @@
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.keystream" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.keystream" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.keystream.len" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.keystream.len" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.len" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.len" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.values.at" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab.values.at" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab_i" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/package-parts.tab_i" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream" afterDir="false" />
@@ -393,16 +490,21 @@
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/last-build.bin" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/cacheable/last-build.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build/outputs/logs/manifest-merger-debug-report.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/build/outputs/logs/manifest-merger-debug-report.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/data/model/AuthModels.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/data/model/AuthModels.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/data/model/DashboardModels.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/data/model/DashboardModels.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/data/remote/MinLishApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/data/remote/MinLishApiService.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/AuthViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/AuthViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/ForgotPasswordScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/ForgotPasswordScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/LoginScreen.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/RegisterScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/RegisterScreen.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/ResetPasswordScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/auth/ResetPasswordScreen.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/home/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/home/HomeScreen.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/node_modules/.package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/home/HomeViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/home/HomeViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/profile/ProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/profile/ProfileScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/feature/profile/ProfileViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/ui/theme/Color.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/ui/theme/Color.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/ui/theme/Theme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/minlish/app/ui/theme/Theme.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/server.js" afterDir="false" />
     </list>
@@ -414,7 +516,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[PhysicalDevice::serial=R5CWC1ZC7XA]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\DELL\.android\avd\Pixel_8.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -440,7 +542,19 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\LENOVO\.gradle\wrapper\dists\gradle-9.4.1-bin\arn2x92ynaizyzdaamcbpbhtj\gradle-9.4.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.4.1" />
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;vuminhkhang2005&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/PhNguyen-05/DO_AN_MinLish_App.git&quot;,
+    &quot;accountId&quot;: &quot;e88b046c-c06a-42a4-8159-e7eb3259f3b9&quot;
+  }
+}</component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\DELL\.gradle\wrapper\dists\gradle-9.4.1-bin\arn2x92ynaizyzdaamcbpbhtj\gradle-9.4.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.4.1" />
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -465,9 +579,12 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/LENOVO/Documents/GitHub/DO_AN_MinLish_App/MinLishApp",
-    "run.code.analysis.last.selected.profile": "pProject Default"
+    "last_opened_file_path": "K:/MobileProgramming/DO_AN_MinLish_App/MinLishApp",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RunManager">
@@ -538,6 +655,14 @@
       </method>
     </configuration>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="8517aa98-9788-44cf-81c2-d8dee150dd35" name="Changes" comment="" />
@@ -545,8 +670,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1779941969419</updated>
+      <workItem from="1780068376767" duration="21000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
