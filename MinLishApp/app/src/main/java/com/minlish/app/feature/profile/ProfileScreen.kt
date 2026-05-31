@@ -1,9 +1,12 @@
 package com.minlish.app.feature.profile
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
@@ -58,6 +62,11 @@ fun ProfileScreen(
                 viewModel.onAvatarChange(avatarPayload.base64, avatarPayload.mimeType)
             }
         }
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        viewModel.onPushEnabledChange(granted)
     }
 
     LaunchedEffect(Unit) { viewModel.loadProfile() }
@@ -245,7 +254,17 @@ fun ProfileScreen(
                     }
                     Switch(
                         checked = viewModel.pushEnabled,
-                        onCheckedChange = { viewModel.onPushEnabledChange(it) },
+                        onCheckedChange = { enabled ->
+                            if (
+                                enabled &&
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                viewModel.onPushEnabledChange(enabled)
+                            }
+                        },
                         colors = SwitchDefaults.colors(checkedThumbColor = primaryColor, checkedTrackColor = primaryColor.copy(alpha = 0.5f))
                     )
                 }

@@ -1,6 +1,19 @@
 ProjectDescription.md
 minlish_db.sql
+
 backend/node_modules/
 .env
+
 .idea/
 *.log
+
+# Android Studio
+.gradle/
+build/
+*/build/
+
+# APK
+*.apk
+
+# Kotlin/Java
+*.class

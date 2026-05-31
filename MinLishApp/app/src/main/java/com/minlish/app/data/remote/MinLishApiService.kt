@@ -10,6 +10,7 @@ import com.minlish.app.data.model.LearningSessionResponse
 import com.minlish.app.data.model.NotificationSummaryResponse
 import com.minlish.app.data.model.ProfileResponse
 import com.minlish.app.data.model.ProfileUpdateRequest
+import com.minlish.app.data.model.ProgressResponse
 import com.minlish.app.data.model.UserSettingsRequest
 import com.minlish.app.data.model.UserSettingsResponse
 import com.minlish.app.data.model.RegisterRequest
@@ -34,6 +35,9 @@ interface MinLishApiService {
 
     @GET("api/dashboard")
     suspend fun getDashboard(@Header("Authorization") token: String): DashboardResponse
+
+    @GET("api/dashboard/progress")
+    suspend fun getProgress(@Header("Authorization") token: String): ProgressResponse
 
     // Forgot / Reset password endpoints (placeholders - backend must implement)
     @POST("api/auth/forgot-password")

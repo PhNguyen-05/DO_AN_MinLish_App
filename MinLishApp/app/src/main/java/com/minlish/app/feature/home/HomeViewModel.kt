@@ -10,6 +10,7 @@ import com.minlish.app.data.model.DashboardResponse
 import com.minlish.app.data.model.LearningDeckListResponse
 import com.minlish.app.data.model.LearningPlanResponse
 import com.minlish.app.data.model.NotificationSummaryResponse
+import com.minlish.app.data.model.ProgressResponse
 import com.minlish.app.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
 
@@ -23,13 +24,21 @@ class HomeViewModel : ViewModel() {
     var learningDecksState by mutableStateOf(LearningDeckListResponse())
         private set
 
+    var progressState by mutableStateOf<ProgressResponse?>(null)
+        private set
+
+    var notificationSummaryState by mutableStateOf<NotificationSummaryResponse?>(null)
+        private set
+
     fun fetchDashboardData() {
         viewModelScope.launch {
             try {
                 UserSession.token?.let { token ->
                     dashboardState = RetrofitClient.instance.getDashboard(token)
+                    progressState = RetrofitClient.instance.getProgress(token)
                     learningPlanState = RetrofitClient.instance.getLearningPlan(token)
                     learningDecksState = RetrofitClient.instance.getLearningDecks(token)
+                    notificationSummaryState = RetrofitClient.instance.getNotificationSummary(token)
                 }
             } catch (e: Exception) {
                 // Keep the current cached state when the network is unavailable.

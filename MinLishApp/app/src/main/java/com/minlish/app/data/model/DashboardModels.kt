@@ -10,3 +10,16 @@ data class DashboardResponse(
     val daily_new_words_goal: Int,
     val avatar_url: String? = null
 )
+
+data class ProgressResponse(
+    val daily_activity: List<DailyActivityItem> = emptyList(),
+    val retention_rate: Float,
+    val estimated_level: String,
+    val level_reason: String
+)
+
+data class DailyActivityItem(
+    val date: String,
+    val words_learned: Int,
+    val words_reviewed: Int
+)

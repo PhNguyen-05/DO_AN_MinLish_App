@@ -1,8 +1,5 @@
 package com.minlish.app.feature.home
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -54,8 +51,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.minlish.app.data.model.LearningDeckSummary
 import com.minlish.app.data.model.NotificationSummaryResponse
+import com.minlish.app.data.model.ProgressResponse
 import com.minlish.app.data.remote.RetrofitClient
-import com.minlish.app.feature.notification.NotificationScheduler
 import com.minlish.app.feature.notification.ReminderPreferences
 import kotlinx.coroutines.launch
 
@@ -76,6 +73,8 @@ fun HomeScreen(
     val data = viewModel.dashboardState
     val learningPlan = viewModel.learningPlanState
     val learningDecks = viewModel.learningDecksState
+    val progress = viewModel.progressState
+    val notificationSummary = viewModel.notificationSummaryState
 
     LaunchedEffect(learningPlan) {
         learningPlan?.let { plan ->
@@ -89,7 +88,6 @@ fun HomeScreen(
     }
     val lifecycleOwner = LocalLifecycleOwner.current
     var isVisible by remember { mutableStateOf(false) }
-    val primaryColor = Color(0xFF26A69A)
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -173,6 +171,13 @@ fun HomeScreen(
                 dailyReviewGoal = learningPlan?.daily_review_goal ?: 50,
                 reviewedToday = learningPlan?.words_reviewed_today ?: 0,
                 dueReviewCount = learningPlan?.due_review_count ?: 0
+            )
+
+            ProgressOverviewSection(progress = progress)
+
+            StudyReminderSummaryCard(
+                summary = notificationSummary,
+                fallbackDueReviewCount = learningPlan?.due_review_count ?: 0
             )
 
             Text("Hành động nhanh", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -382,6 +387,228 @@ fun DailyGoalCard(
                 "$reviewedToday / $dailyReviewGoal thẻ ôn, $dueReviewCount thẻ đang đến hạn",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+fun ProgressOverviewSection(progress: ProgressResponse?) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Theo dõi tiến độ", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            LevelEstimationCard(progress = progress, modifier = Modifier.weight(1f))
+            RetentionRateCard(rate = progress?.retention_rate ?: 0f, modifier = Modifier.weight(1f))
+        }
+
+        DailyActivityChart(progress = progress)
+    }
+}
+
+@Composable
+fun LevelEstimationCard(progress: ProgressResponse?, modifier: Modifier = Modifier) {
+    val level = progress?.estimated_level ?: "Beginner"
+    val color = when (level) {
+        "Advanced" -> Color(0xFF7E57C2)
+        "Intermediate" -> Color(0xFF5E7CE2)
+        else -> Color(0xFF26A69A)
+    }
+
+    Card(
+        modifier = modifier.height(146.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.22f)),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Surface(shape = RoundedCornerShape(10.dp), color = color.copy(alpha = 0.12f)) {
+                Text("Level", modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp), color = color, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+            }
+            Text(level, fontWeight = FontWeight.Bold, fontSize = 21.sp, color = Color(0xFF102522))
+            Text(
+                progress?.level_reason ?: "Bắt đầu học để hệ thống ước lượng level chính xác hơn.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun RetentionRateCard(rate: Float, modifier: Modifier = Modifier) {
+    val percent = (rate * 100).toInt().coerceIn(0, 100)
+    val animatedRate by animateFloatAsState(
+        targetValue = rate.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 650),
+        label = "retentionRate"
+    )
+
+    Card(
+        modifier = modifier.height(146.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFDDEBE7)),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("Ghi nhớ", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text("$percent%", fontWeight = FontWeight.Bold, fontSize = 28.sp, color = Color(0xFF26A69A))
+            LinearProgressIndicator(
+                progress = { animatedRate },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(999.dp)),
+                color = Color(0xFF26A69A),
+                trackColor = Color(0xFFE4EEEA)
+            )
+            Text("Dựa trên kết quả ôn tập 30 ngày gần nhất.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+fun DailyActivityChart(progress: ProgressResponse?) {
+    val items = progress?.daily_activity.orEmpty()
+    val maxTotal = items.maxOfOrNull { it.words_learned + it.words_reviewed }?.coerceAtLeast(1) ?: 1
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFE7ECEA)),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Hoạt động hằng ngày", modifier = Modifier.weight(1f), fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                ChartLegend(Color(0xFF26A69A), "Mới")
+                Spacer(modifier = Modifier.width(8.dp))
+                ChartLegend(Color(0xFF5E7CE2), "Ôn")
+            }
+
+            if (items.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().height(132.dp), contentAlignment = Alignment.Center) {
+                    Text("Chưa có dữ liệu học tập.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(146.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    items.forEach { item ->
+                        ActivityBar(
+                            learned = item.words_learned,
+                            reviewed = item.words_reviewed,
+                            maxTotal = maxTotal,
+                            label = item.date.takeLast(2),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ChartLegend(color: Color, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+fun ActivityBar(learned: Int, reviewed: Int, maxTotal: Int, label: String, modifier: Modifier = Modifier) {
+    val learnedHeight = ((learned.toFloat() / maxTotal) * 104).coerceIn(2f, 104f)
+    val reviewedHeight = ((reviewed.toFloat() / maxTotal) * 104).coerceIn(2f, 104f)
+
+    Column(modifier = modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.weight(1f))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(108.dp),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (reviewed > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .height(reviewedHeight.dp)
+                        .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                        .background(Color(0xFF5E7CE2))
+                )
+            }
+            if (learned > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .height(learnedHeight.dp)
+                        .clip(RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp))
+                        .background(Color(0xFF26A69A))
+                )
+            }
+            if (learned == 0 && reviewed == 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color(0xFFE4EEEA))
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+fun StudyReminderSummaryCard(summary: NotificationSummaryResponse?, fallbackDueReviewCount: Int) {
+    val dueCount = summary?.due_review_count ?: fallbackDueReviewCount
+    val newWords = summary?.new_words_available ?: 0
+    val body = summary?.push_body ?: when {
+        dueCount > 0 -> "Bạn có $dueCount thẻ cần ôn hôm nay."
+        newWords > 0 -> "Bạn còn $newWords từ mới có thể học hôm nay."
+        else -> "Mở MinLish để giữ nhịp học hằng ngày."
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF)),
+        border = BorderStroke(1.dp, Color(0xFFD6E3F8)),
+        elevation = CardDefaults.cardElevation(1.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(shape = RoundedCornerShape(12.dp), color = Color(0xFFE8F0FF)) {
+                Icon(
+                    Icons.Default.Notifications,
+                    contentDescription = null,
+                    tint = Color(0xFF5E7CE2),
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(summary?.push_title ?: "MinLish nhắc học", fontWeight = FontWeight.SemiBold)
+                Text(body, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }
