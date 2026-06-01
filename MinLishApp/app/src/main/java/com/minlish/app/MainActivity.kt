@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MinLishAppNavigation() {
     val navController = rememberNavController()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     val authViewModel: AuthViewModel = viewModel()
     val homeViewModel: HomeViewModel = viewModel()
@@ -48,7 +49,16 @@ fun MinLishAppNavigation() {
     val importExportViewModel: ImportExportViewModel = viewModel()
     val learningViewModel: LearningViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = "login") {
+    // Restore login session on app startup for offline auto-login
+    val sharedPrefs = context.getSharedPreferences("minlish_auth", android.content.Context.MODE_PRIVATE)
+    val savedToken = sharedPrefs.getString("token", null)
+    if (savedToken != null && com.minlish.app.data.local.UserSession.token == null) {
+        com.minlish.app.data.local.UserSession.token = savedToken
+    }
+
+    val startDestination = if (com.minlish.app.data.local.UserSession.token != null) "home" else "login"
+
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("login") {
             LoginScreen(
                 viewModel = authViewModel,
@@ -118,6 +128,9 @@ fun MinLishAppNavigation() {
                 onBack = { navController.popBackStack() },
                 onLogout = {
                     authViewModel.logout()
+                    homeViewModel.resetState()
+                    profileViewModel.resetState()
+                    learningViewModel.resetState()
                     navController.navigate("login") { popUpTo("home") { inclusive = true } }
                 }
             )
@@ -143,7 +156,10 @@ fun MinLishAppNavigation() {
                 viewModel = learningViewModel,
                 deckId = deckId,
                 initialMode = mode,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    homeViewModel.fetchDashboardData()
+                    navController.popBackStack()
+                }
             )
         }
     }

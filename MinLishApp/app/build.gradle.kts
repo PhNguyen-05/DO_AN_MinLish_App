@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.ksp)
 }
 
 android {
@@ -73,7 +74,10 @@ dependencies {
     // Coroutines để chạy tác vụ ngầm không gây đơ UI
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-
+    // Room database cho Offline local storage
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    "ksp"(libs.room.compiler)
 
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("androidx.compose.material:material-icons-core")

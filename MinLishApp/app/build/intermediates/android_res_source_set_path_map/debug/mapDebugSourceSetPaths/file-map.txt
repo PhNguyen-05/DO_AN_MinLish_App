@@ -1,8 +1,0 @@
-com.minlish.app-pngs-0 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\build\generated\res\pngs\debug
-com.minlish.app-updated_navigation_xml-1 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\build\generated\updated_navigation_xml\debug
-com.minlish.app-packageDebugResources-2 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.minlish.app-packageDebugResources-3 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.minlish.app-debug-4 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.minlish.app-debug-5 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\src\debug\res
-com.minlish.app-main-6 K:\MobileProgramming\DO_AN_MinLish_App\MinLishApp\app\src\main\res
-gradleHome-0 C:\Users\DELL\.gradle

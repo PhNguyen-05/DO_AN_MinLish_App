@@ -1,10 +1,11 @@
 package com.minlish.app.feature.auth
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.UserSession
 import com.minlish.app.data.model.RegisterRequest
@@ -15,7 +16,10 @@ import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
 
-class AuthViewModel : ViewModel() {
+import com.minlish.app.data.local.db.MinLishDatabase
+import kotlinx.coroutines.Dispatchers
+
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     var loginError by mutableStateOf("")
         private set
@@ -70,7 +74,14 @@ class AuthViewModel : ViewModel() {
                 val response = RetrofitClient.instance.login(
                     mapOf("email" to normalizedEmail, "password" to password)
                 )
-                UserSession.token = "Bearer ${response.token}"
+                val token = "Bearer ${response.token}"
+                UserSession.token = token
+                
+                // Save token to SharedPreferences for offline auto-login
+                val prefs = getApplication<Application>()
+                    .getSharedPreferences("minlish_auth", android.content.Context.MODE_PRIVATE)
+                prefs.edit().putString("token", token).apply()
+
                 loginError = ""
                 onSuccess()
             } catch (e: HttpException) {
@@ -255,11 +266,22 @@ class AuthViewModel : ViewModel() {
 
     fun logout() {
         UserSession.token = null
+        val app = getApplication<Application>()
+        val prefs = app.getSharedPreferences("minlish_auth", android.content.Context.MODE_PRIVATE)
+        prefs.edit().remove("token").apply()
         loginError = ""
         registerMessage = ""
         registerError = ""
         forgotMessage = ""
         forgotError = ""
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                MinLishDatabase.getInstance(app).clearAllTables()
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Failed to clear Room database on logout", e)
+            }
+        }
     }
 
     private fun ResponseBody?.toApiErrorMessage(): String? {

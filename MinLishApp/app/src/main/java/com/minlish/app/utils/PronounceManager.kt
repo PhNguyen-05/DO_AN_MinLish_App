@@ -6,10 +6,13 @@ import android.media.MediaPlayer
 import android.speech.tts.TextToSpeech
 import java.util.Locale
 
+import android.media.AudioManager
+
 class PronounceManager(private val context: Context) {
     private var tts: TextToSpeech? = null
     private var isTtsReady = false
     private var mediaPlayer: MediaPlayer? = null
+    private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
     init {
         tts = TextToSpeech(context.applicationContext) { status ->
@@ -23,6 +26,18 @@ class PronounceManager(private val context: Context) {
     }
 
     fun pronounce(word: String, audioUrl: String? = null) {
+        // 0. Ensure system media volume is at a reasonable level (at least 70% of max)
+        try {
+            val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val targetVolume = (maxVolume * 0.7f).toInt()
+            if (currentVolume < targetVolume) {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVolume, 0)
+            }
+        } catch (e: Exception) {
+            // Ignore volume setting if disallowed by system policies
+        }
+
         // 1. Stop any currently active text-to-speech
         if (isTtsReady) {
             try {
@@ -55,6 +70,7 @@ class PronounceManager(private val context: Context) {
                             .setUsage(AudioAttributes.USAGE_MEDIA)
                             .build()
                     )
+                    setVolume(1.0f, 1.0f)
                     setDataSource(resolvedAudioUrl)
                     prepareAsync()
                     setOnPreparedListener { start() }
@@ -84,7 +100,10 @@ class PronounceManager(private val context: Context) {
 
     private fun speakTts(word: String) {
         if (isTtsReady) {
-            tts?.speak(word, TextToSpeech.QUEUE_FLUSH, null, null)
+            val params = android.os.Bundle().apply {
+                putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+            }
+            tts?.speak(word, TextToSpeech.QUEUE_FLUSH, params, "tts_pronounce")
         }
     }
 

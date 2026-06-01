@@ -1,18 +1,21 @@
 package com.minlish.app.feature.learning
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.UserSession
 import com.minlish.app.data.model.LearningCard
 import com.minlish.app.data.model.LearningPlanResponse
 import com.minlish.app.data.model.ReviewCardRequest
-import com.minlish.app.data.remote.RetrofitClient
+import com.minlish.app.data.repository.MinLishRepository
 import kotlinx.coroutines.launch
 
-class LearningViewModel : ViewModel() {
+class LearningViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = MinLishRepository.getInstance(application)
+
     var plan by mutableStateOf<LearningPlanResponse?>(null)
         private set
 
@@ -65,8 +68,8 @@ class LearningViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                plan = RetrofitClient.instance.getLearningPlan(token)
-                val session = RetrofitClient.instance.getLearningSession(token, mode, 20, deckId)
+                plan = repository.getLearningPlan(token)
+                val session = repository.getLearningSession(token, mode, 20, deckId)
                 cards = session.cards
                 currentIndex = 0
                 if (cards.isEmpty()) {
@@ -96,14 +99,14 @@ class LearningViewModel : ViewModel() {
         message = ""
         viewModelScope.launch {
             try {
-                val result = RetrofitClient.instance.reviewCard(token, ReviewCardRequest(card.id, quality))
+                val result = repository.reviewCard(token, ReviewCardRequest(card.id, quality))
                 message = when (quality) {
                     0 -> "Thử lại thẻ này thêm một lần nữa."
                     1 -> "Đã ghi nhận mức Hard. Lần ôn tiếp theo sau ${result.interval_days} ngày."
                     2 -> "Tốt lắm. Lần ôn tiếp theo sau ${result.interval_days} ngày."
                     else -> "Rất ổn. Lần ôn tiếp theo sau ${result.interval_days} ngày."
                 }
-                plan = RetrofitClient.instance.getLearningPlan(token)
+                plan = repository.getLearningPlan(token)
                 showingBack = false
                 if (quality != 0) {
                     currentIndex += 1
@@ -114,5 +117,18 @@ class LearningViewModel : ViewModel() {
                 submitting = false
             }
         }
+    }
+
+    fun resetState() {
+        plan = null
+        cards = emptyList()
+        currentIndex = 0
+        selectedMode = "mixed"
+        selectedDeckId = null
+        showingBack = false
+        loading = false
+        submitting = false
+        error = ""
+        message = ""
     }
 }

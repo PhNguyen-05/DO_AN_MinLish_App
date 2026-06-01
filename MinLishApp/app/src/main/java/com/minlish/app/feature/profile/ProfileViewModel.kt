@@ -1,19 +1,22 @@
 package com.minlish.app.feature.profile
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.UserSession
 import com.minlish.app.data.model.ProfileUpdateRequest
 import com.minlish.app.data.model.UserSettingsRequest
+import com.minlish.app.data.repository.MinLishRepository
 import com.minlish.app.data.remote.RetrofitClient
 import android.content.Context
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = MinLishRepository.getInstance(application)
     var fullName by mutableStateOf("")
         private set
 
@@ -67,10 +70,10 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 // Fetch profile
-                val resp = RetrofitClient.instance.getProfile(token)
-                fullName = resp.full_name
-                targetGoal = resp.target_goal
-                level = resp.current_level
+                val resp = repository.getProfile(token)
+                fullName = resp.full_name.orEmpty()
+                targetGoal = resp.target_goal.orEmpty()
+                level = resp.current_level ?: "A1"
                 avatarBase64 = resp.avatarBase64
                 avatarMimeType = resp.avatarMimeType
                 avatarUrl = RetrofitClient.resolveServerUrl(resp.avatar_url)
@@ -78,14 +81,15 @@ class ProfileViewModel : ViewModel() {
                 error = ""
 
                 // Fetch settings
-                val settings = RetrofitClient.instance.getSettings(token)
+                val settings = repository.getSettings(token)
                 pushEnabled = settings.notifications_enabled == 1
                 emailEnabled = settings.email_notifications_enabled == 1
                 val timeParts = settings.daily_reminder_time?.split(":") ?: listOf("20", "00")
                 reminderHour = timeParts.getOrNull(0)?.toIntOrNull() ?: 20
                 reminderMinute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
             } catch (e: Exception) {
-                error = "Không thể tải hồ sơ hoặc cài đặt nhắc nhở."
+                android.util.Log.e("ProfileViewModel", "Error loading profile/settings", e)
+                error = "Không thể tải hồ sơ hoặc cài đặt nhắc nhở: ${e.message ?: e.localizedMessage ?: e.toString()}"
             } finally {
                 loading = false
             }
@@ -122,7 +126,7 @@ class ProfileViewModel : ViewModel() {
                     avatarMimeType = avatarMimeType,
                     removeAvatar = removeAvatar
                 )
-                val res = RetrofitClient.instance.updateProfile(token, req)
+                val res = repository.updateProfile(token, req)
 
                 // Update settings on backend
                 val timeStr = String.format(java.util.Locale.US, "%02d:%02d:00", reminderHour, reminderMinute)
@@ -134,7 +138,7 @@ class ProfileViewModel : ViewModel() {
                     dailyNewWordsGoal = 20,
                     dailyReviewGoal = 50
                 )
-                RetrofitClient.instance.updateSettings(token, settingsReq)
+                repository.updateSettings(token, settingsReq)
 
                 // Schedule local alarm
                 if (pushEnabled) {
@@ -150,9 +154,9 @@ class ProfileViewModel : ViewModel() {
 
                 if (res.isSuccessful) {
                     res.body()?.let { updated ->
-                        fullName = updated.full_name
-                        targetGoal = updated.target_goal
-                        level = updated.current_level
+                        fullName = updated.full_name.orEmpty()
+                        targetGoal = updated.target_goal.orEmpty()
+                        level = updated.current_level ?: "A1"
                         avatarUrl = RetrofitClient.resolveServerUrl(updated.avatar_url)
                         avatarBase64 = null
                         avatarMimeType = null
@@ -181,7 +185,7 @@ class ProfileViewModel : ViewModel() {
         emailTestResult = ""
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.instance.sendStudyReminderEmail(token)
+                val response = repository.sendStudyReminderEmail(token)
                 emailTestResult = response.message ?: "Đã gửi email nhắc học thành công. Vui lòng kiểm tra hộp thư!"
             } catch (e: Exception) {
                 emailTestResult = "Không gửi được email: ${e.localizedMessage}"
@@ -189,6 +193,25 @@ class ProfileViewModel : ViewModel() {
                 sendingTestEmail = false
             }
         }
+    }
+
+    fun resetState() {
+        fullName = ""
+        targetGoal = ""
+        level = "A1"
+        avatarBase64 = null
+        avatarMimeType = null
+        avatarUrl = null
+        removeAvatar = false
+        loading = false
+        error = ""
+        successMessage = ""
+        pushEnabled = true
+        emailEnabled = true
+        reminderHour = 20
+        reminderMinute = 0
+        sendingTestEmail = false
+        emailTestResult = ""
     }
 
     private fun String.toApiErrorMessage(): String? {

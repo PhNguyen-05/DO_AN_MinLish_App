@@ -189,12 +189,12 @@ fun HomeScreen(
             Text("Tiếp tục học", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             ContinueLearningCard(
                 deck = learningDecks.continue_deck,
-                onLearningClick = { deckId -> onLearningClick(deckId, null) }
+                onLearningClick = { deckId -> onLearningClick(deckId, "mixed") }
             )
 
             SuggestedDeckSection(
                 decks = learningDecks.decks,
-                onLearningClick = { deckId -> onLearningClick(deckId, null) }
+                onLearningClick = { deckId, mode -> onLearningClick(deckId, mode) }
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -709,7 +709,7 @@ fun ContinueLearningCard(deck: LearningDeckSummary?, onLearningClick: (Long?) ->
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SuggestedDeckSection(decks: List<LearningDeckSummary>, onLearningClick: (Long) -> Unit) {
+fun SuggestedDeckSection(decks: List<LearningDeckSummary>, onLearningClick: (Long, String) -> Unit) {
     val pageSize = 2
     val sortedDecks = remember(decks) {
         decks.sortedWith(
@@ -769,9 +769,10 @@ fun SuggestedDeckSection(decks: List<LearningDeckSummary>, onLearningClick: (Lon
                 val pageDecks = sortedDecks.drop(page * pageSize).take(pageSize)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     pageDecks.forEach { deck ->
+                        val mode = if (deck.due_review_count > 0) "review" else "new"
                         SuggestedDeckCard(
                             deck = deck,
-                            onLearningClick = { onLearningClick(deck.id) },
+                            onLearningClick = { onLearningClick(deck.id, mode) },
                             modifier = Modifier.weight(1f)
                         )
                     }

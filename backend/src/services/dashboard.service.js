@@ -1,19 +1,25 @@
 const db = require('../config/db');
 const { createHttpError } = require('../utils/httpError');
+const learningService = require('./learning.service');
 
 async function getDashboardByUserId(userId) {
+    // Recalculate and update user statistics (such as streak) dynamically
+    await learningService.refreshUserStatistics(userId);
+
     const [data] = await db.query(`
         SELECT u.full_name, u.target_goal, u.current_level, u.avatar_url,
-               s.current_streak, s.total_words_learned, s.accuracy_rate,
-               us.daily_new_words_goal
+               COALESCE(s.current_streak, 0) AS current_streak,
+               COALESCE(s.total_words_learned, 0) AS total_words_learned,
+               COALESCE(s.accuracy_rate, 0) AS accuracy_rate,
+               COALESCE(us.daily_new_words_goal, 20) AS daily_new_words_goal
         FROM users u
-        JOIN user_statistics s ON u.id = s.user_id
-        JOIN user_settings us ON u.id = us.user_id
+        LEFT JOIN user_statistics s ON u.id = s.user_id
+        LEFT JOIN user_settings us ON u.id = us.user_id
         WHERE u.id = ?
     `, [userId]);
 
     if (data.length === 0) {
-        throw createHttpError(404, 'Không tìm thấy dữ liệu thống kê của người dùng này!');
+        throw createHttpError(404, 'Không tìm thấy thông tin của người dùng này!');
     }
 
     return data[0];

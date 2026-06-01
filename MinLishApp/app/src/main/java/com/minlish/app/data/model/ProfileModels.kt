@@ -3,9 +3,9 @@ package com.minlish.app.data.model
 data class ProfileResponse(
     val id: Long? = null,
     val email: String? = null,
-    val full_name: String,
-    val target_goal: String,
-    val current_level: String,
+    val full_name: String? = null,
+    val target_goal: String? = null,
+    val current_level: String? = null,
     val avatar_url: String? = null,
     val avatarBase64: String? = null,
     val avatarMimeType: String? = null

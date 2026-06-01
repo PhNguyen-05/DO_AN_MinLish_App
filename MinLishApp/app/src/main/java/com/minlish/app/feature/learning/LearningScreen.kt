@@ -37,6 +37,8 @@ import com.minlish.app.data.model.LearningCard
 import com.minlish.app.data.model.LearningPlanResponse
 import com.minlish.app.data.remote.RetrofitClient
 
+import androidx.activity.compose.BackHandler
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearningScreen(
@@ -48,6 +50,10 @@ fun LearningScreen(
     val primaryColor = Color(0xFF26A69A)
     val context = androidx.compose.ui.platform.LocalContext.current
     val pronounceManager = remember { PronounceManager(context) }
+
+    BackHandler {
+        onBack()
+    }
 
     DisposableEffect(Unit) {
         onDispose {

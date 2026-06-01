@@ -354,18 +354,19 @@ async function refreshUserStatistics(userId) {
     const currentStreak = await calculateCurrentStreak(userId);
 
     await db.query(`
-        UPDATE user_statistics
-        SET total_words_learned = ?,
-            accuracy_rate = ?,
-            current_streak = ?,
-            max_streak = GREATEST(max_streak, ?)
-        WHERE user_id = ?
+        INSERT INTO user_statistics (user_id, total_words_learned, accuracy_rate, current_streak, max_streak)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            total_words_learned = VALUES(total_words_learned),
+            accuracy_rate = VALUES(accuracy_rate),
+            current_streak = VALUES(current_streak),
+            max_streak = GREATEST(max_streak, VALUES(max_streak))
     `, [
+        userId,
         learned.count,
         accuracy.rate || 0,
         currentStreak,
-        currentStreak,
-        userId
+        currentStreak
     ]);
 }
 
@@ -379,9 +380,23 @@ async function calculateCurrentStreak(userId) {
     `, [userId]);
 
     const studiedDates = new Set(rows.map(row => row.study_date));
-    let cursor = new Date();
-    let streak = 0;
+    const todayStr = toDateKey(new Date());
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = toDateKey(yesterday);
 
+    // If no study today AND no study yesterday, streak is broken (0)
+    if (!studiedDates.has(todayStr) && !studiedDates.has(yesterdayStr)) {
+        return 0;
+    }
+
+    // Start cursor at yesterday if they haven't studied yet today, to keep streak alive
+    let cursor = new Date();
+    if (!studiedDates.has(todayStr)) {
+        cursor = yesterday;
+    }
+
+    let streak = 0;
     while (studiedDates.has(toDateKey(cursor))) {
         streak += 1;
         cursor.setDate(cursor.getDate() - 1);
@@ -402,5 +417,6 @@ module.exports = {
     getDailyPlan,
     getDeckSummaries,
     getLearningSession,
-    reviewCard
+    reviewCard,
+    refreshUserStatistics
 };
