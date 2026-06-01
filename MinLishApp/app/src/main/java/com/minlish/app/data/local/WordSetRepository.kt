@@ -41,6 +41,7 @@ class WordSetRepository(context: Context) {
             .put("sourceFileName", sourceFileName)
             .put("createdAt", createdAt)
             .put("updatedAt", updatedAt)
+            .put("deckId", deckId ?: JSONObject.NULL)
             .put("words", JSONArray(words.map { it.toJson() }))
     }
 
@@ -68,7 +69,8 @@ class WordSetRepository(context: Context) {
             sourceFileName = optString("sourceFileName"),
             createdAt = optLong("createdAt"),
             updatedAt = optLong("updatedAt"),
-            words = words
+            words = words,
+            deckId = optLongOrNull("deckId")
         )
     }
 
@@ -88,6 +90,10 @@ class WordSetRepository(context: Context) {
             partOfSpeech = optString("partOfSpeech"),
             tags = tags
         )
+    }
+
+    private fun JSONObject.optLongOrNull(name: String): Long? {
+        return if (has(name) && !isNull(name)) optLong(name) else null
     }
 
     private companion object {

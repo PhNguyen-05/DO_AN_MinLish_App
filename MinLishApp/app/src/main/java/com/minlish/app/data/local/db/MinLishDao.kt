@@ -39,6 +39,12 @@ interface MinLishDao {
     @Query("DELETE FROM decks")
     suspend fun clearDecks()
 
+    @Query("DELETE FROM decks WHERE id > 0")
+    suspend fun clearServerDecks()
+
+    @Query("DELETE FROM decks WHERE id = :deckId")
+    suspend fun deleteDeckById(deckId: Long)
+
     // Cards
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCards(cards: List<CardEntity>)
@@ -61,6 +67,9 @@ interface MinLishDao {
 
     @Query("DELETE FROM cards")
     suspend fun clearCards()
+
+    @Query("DELETE FROM cards WHERE deckId = :deckId")
+    suspend fun deleteCardsByDeckId(deckId: Long)
 
     // Pending Reviews (Sync Queue)
     @Insert(onConflict = OnConflictStrategy.REPLACE)

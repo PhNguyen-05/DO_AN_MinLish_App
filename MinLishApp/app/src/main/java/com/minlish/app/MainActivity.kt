@@ -119,7 +119,14 @@ fun MinLishAppNavigation() {
         composable("import_export") {
             ImportExportScreen(
                 viewModel = importExportViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    homeViewModel.fetchDashboardData()
+                    navController.popBackStack()
+                },
+                onStudyDeck = { deckId ->
+                    homeViewModel.fetchDashboardData()
+                    navController.navigate("learning?deckId=$deckId&mode=mixed")
+                }
             )
         }
         composable("profile") {

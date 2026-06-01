@@ -6,6 +6,7 @@ import org.w3c.dom.Node
 import java.io.InputStream
 import java.util.UUID
 import java.util.zip.ZipInputStream
+import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 
 data class ParsedWordFile(
@@ -16,28 +17,19 @@ data class ParsedWordFile(
 
 object WordFileParser {
     fun parseCsv(content: String): ParsedWordFile {
-        val rows = content
-            .removePrefix("\uFEFF")
-            .lineSequence()
-            .filter { it.isNotBlank() }
-            .map { parseCsvLine(it) }
-            .toList()
-        return rows.toParsedWordFile()
+        return parseCsvRows(content.removePrefix("\uFEFF")).toParsedWordFile()
+    }
+
+    fun parse(fileName: String, inputStream: InputStream): ParsedWordFile {
+        return when (fileName.substringAfterLast('.', "").lowercase()) {
+            "xlsx" -> parseXlsx(inputStream)
+            "doc", "docx" -> error("Chỉ hỗ trợ CSV và Excel (.xlsx).")
+            else -> parseCsv(inputStream.readBytes().toString(Charsets.UTF_8))
+        }
     }
 
     fun parseXlsx(inputStream: InputStream): ParsedWordFile {
-        val entries = mutableMapOf<String, ByteArray>()
-        ZipInputStream(inputStream).use { zip ->
-            var entry = zip.nextEntry
-            while (entry != null) {
-                if (!entry.isDirectory && (entry.name == SHARED_STRINGS || entry.name == FIRST_SHEET)) {
-                    entries[entry.name] = zip.readBytes()
-                }
-                zip.closeEntry()
-                entry = zip.nextEntry
-            }
-        }
-
+        val entries = readZipEntries(inputStream, setOf(SHARED_STRINGS, FIRST_SHEET))
         val sheetBytes = entries[FIRST_SHEET] ?: error("Không tìm thấy sheet đầu tiên trong file Excel.")
         val sharedStrings = entries[SHARED_STRINGS]?.let(::parseSharedStrings).orEmpty()
         return parseSheetRows(sheetBytes, sharedStrings).toParsedWordFile()
@@ -63,12 +55,15 @@ object WordFileParser {
     }
 
     private fun List<List<String>>.toParsedWordFile(): ParsedWordFile {
-        if (isEmpty()) return ParsedWordFile(emptyList(), skippedCount = 0, duplicateCount = 0)
+        val normalizedRows = filter { row ->
+            row.any { it.isNotBlank() } && !row.firstOrNull().orEmpty().trimStart().startsWith("#")
+        }
+        if (normalizedRows.isEmpty()) return ParsedWordFile(emptyList(), skippedCount = 0, duplicateCount = 0)
 
-        val firstRow = first().map { it.normalizedHeader() }
+        val firstRow = normalizedRows.first().map { it.normalizedHeader() }
         val hasHeader = HEADER_ALIASES.values.flatten().any { alias -> firstRow.contains(alias) }
-        val dataRows = if (hasHeader) drop(1) else this
-        val columnMap = if (hasHeader) buildColumnMap(first()) else defaultColumnMap()
+        val dataRows = if (hasHeader) normalizedRows.drop(1) else normalizedRows
+        val columnMap = if (hasHeader) buildColumnMap(normalizedRows.first()) else defaultColumnMap()
 
         var skipped = 0
         var duplicate = 0
@@ -129,29 +124,49 @@ object WordFileParser {
         return if (index != null && index in indices) this[index] else ""
     }
 
-    private fun parseCsvLine(line: String): List<String> {
-        val cells = mutableListOf<String>()
+    private fun parseCsvRows(content: String): List<List<String>> {
+        val rows = mutableListOf<List<String>>()
+        val row = mutableListOf<String>()
         val cell = StringBuilder()
         var inQuotes = false
         var index = 0
-        while (index < line.length) {
-            val char = line[index]
+
+        fun flushRow() {
+            row.add(cell.toString())
+            cell.clear()
+            if (row.any { it.isNotBlank() }) {
+                rows.add(row.toList())
+            }
+            row.clear()
+        }
+
+        while (index < content.length) {
+            val char = content[index]
             when {
-                char == '"' && inQuotes && index + 1 < line.length && line[index + 1] == '"' -> {
+                char == '"' && inQuotes && index + 1 < content.length && content[index + 1] == '"' -> {
                     cell.append('"')
                     index++
                 }
                 char == '"' -> inQuotes = !inQuotes
                 char == ',' && !inQuotes -> {
-                    cells.add(cell.toString())
+                    row.add(cell.toString())
                     cell.clear()
+                }
+                (char == '\n' || char == '\r') && !inQuotes -> {
+                    if (char == '\r' && index + 1 < content.length && content[index + 1] == '\n') {
+                        index++
+                    }
+                    flushRow()
                 }
                 else -> cell.append(char)
             }
             index++
         }
-        cells.add(cell.toString())
-        return cells
+
+        if (cell.isNotEmpty() || row.isNotEmpty()) {
+            flushRow()
+        }
+        return rows
     }
 
     private fun parseSharedStrings(bytes: ByteArray): List<String> {
@@ -163,6 +178,21 @@ object WordFileParser {
                 add(nodes.item(index).allText())
             }
         }
+    }
+
+    private fun readZipEntries(inputStream: InputStream, names: Set<String>): Map<String, ByteArray> {
+        val entries = mutableMapOf<String, ByteArray>()
+        ZipInputStream(inputStream).use { zip ->
+            var entry = zip.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory && entry.name in names) {
+                    entries[entry.name] = zip.readBytes()
+                }
+                zip.closeEntry()
+                entry = zip.nextEntry
+            }
+        }
+        return entries
     }
 
     private fun parseSheetRows(bytes: ByteArray, sharedStrings: List<String>): List<List<String>> {
@@ -239,10 +269,16 @@ object WordFileParser {
     private fun newSecureDocumentBuilderFactory(): DocumentBuilderFactory {
         return DocumentBuilderFactory.newInstance().apply {
             isNamespaceAware = false
-            setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
-            setFeature("http://xml.org/sax/features/external-general-entities", false)
-            setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+            isExpandEntityReferences = false
+            setFeatureIfSupported(XMLConstants.FEATURE_SECURE_PROCESSING, true)
+            setFeatureIfSupported("http://apache.org/xml/features/disallow-doctype-decl", true)
+            setFeatureIfSupported("http://xml.org/sax/features/external-general-entities", false)
+            setFeatureIfSupported("http://xml.org/sax/features/external-parameter-entities", false)
         }
+    }
+
+    private fun DocumentBuilderFactory.setFeatureIfSupported(name: String, value: Boolean) {
+        runCatching { setFeature(name, value) }
     }
 
     private const val SHARED_STRINGS = "xl/sharedStrings.xml"

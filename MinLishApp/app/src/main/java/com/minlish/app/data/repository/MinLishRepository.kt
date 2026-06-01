@@ -34,6 +34,66 @@ class MinLishRepository private constructor(context: Context) {
         }
     }
 
+
+    suspend fun importWordSet(wordSet: WordSet): WordSet {
+        val deckId = wordSet.deckId ?: newLocalId()
+        val imported = wordSet.copy(deckId = deckId)
+        val sourceDescription = imported.sourceFileName.takeIf { it.isNotBlank() }?.let { "Imported from $it" }
+
+        dao.insertDecks(
+            listOf(
+                DeckEntity(
+                    id = deckId,
+                    title = imported.name,
+                    description = sourceDescription,
+                    totalWords = imported.words.size,
+                    learnedWords = 0,
+                    newWordsCount = imported.words.size,
+                    dueReviewCount = 0,
+                    lastStudiedAt = null,
+                    isCompleted = imported.words.isEmpty(),
+                    isInProgress = false
+                )
+            )
+        )
+
+        val usedIds = mutableSetOf<Long>()
+        val cards = imported.words.map { word ->
+            val cardId = generateSequence { newLocalId() }.first { usedIds.add(it) }
+            CardEntity(
+                id = cardId,
+                deckId = deckId,
+                deckTitle = imported.name,
+                word = word.term,
+                pronunciation = null,
+                meaning = word.meaning,
+                descriptionEn = null,
+                example = word.example.ifBlank { null },
+                collocation = null,
+                relatedWords = word.tags.joinToString(", ").ifBlank { null },
+                note = word.note.ifBlank { null },
+                imageUrl = null,
+                audioUrl = null,
+                type = "new",
+                easeFactor = 2.5,
+                repetitions = 0,
+                intervalDays = 0,
+                nextReviewAt = null
+            )
+        }
+        if (cards.isNotEmpty()) dao.insertCards(cards)
+        adjustLearningPlan(deltaNewWords = cards.size)
+        return imported
+    }
+
+    suspend fun deleteImportedWordSet(deckId: Long) {
+        if (deckId >= 0) return
+        val cards = dao.getCardsForDeck(deckId)
+        dao.deleteCardsByDeckId(deckId)
+        dao.deleteDeckById(deckId)
+        adjustLearningPlan(deltaNewWords = -cards.count { it.repetitions == 0 })
+    }
+
     // Synchronize offline review queue
     suspend fun syncPendingReviews(token: String) {
         val pending = dao.getPendingReviews()
@@ -127,17 +187,22 @@ class MinLishRepository private constructor(context: Context) {
     suspend fun getLearningPlan(token: String): LearningPlanResponse {
         try {
             val response = api.getLearningPlan(token)
+            val localDecks = dao.getDecks().filter { it.id < 0 }
+            val combined = response.copy(
+                new_words_available = response.new_words_available + localDecks.sumOf { it.newWordsCount },
+                due_review_count = response.due_review_count + localDecks.sumOf { it.dueReviewCount }
+            )
             dao.insertLearningPlan(
                 LearningPlanCache(
-                    dailyNewWordsGoal = response.daily_new_words_goal,
-                    dailyReviewGoal = response.daily_review_goal,
-                    newWordsAvailable = response.new_words_available,
-                    dueReviewCount = response.due_review_count,
-                    wordsLearnedToday = response.words_learned_today,
-                    wordsReviewedToday = response.words_reviewed_today
+                    dailyNewWordsGoal = combined.daily_new_words_goal,
+                    dailyReviewGoal = combined.daily_review_goal,
+                    newWordsAvailable = combined.new_words_available,
+                    dueReviewCount = combined.due_review_count,
+                    wordsLearnedToday = combined.words_learned_today,
+                    wordsReviewedToday = combined.words_reviewed_today
                 )
             )
-            return response
+            return combined
         } catch (e: Exception) {
             // Fallback to cache
         }
@@ -171,39 +236,20 @@ class MinLishRepository private constructor(context: Context) {
                     isInProgress = it.is_in_progress
                 )
             }
-            dao.clearDecks()
+            dao.clearServerDecks()
             dao.insertDecks(entities)
 
-            // Trigger eager preloading of all deck cards in background
+            // Trigger eager preloading of all server deck cards in background
             repositoryScope.launch {
                 preloadAllDecks(token, response.decks)
             }
 
-            return response
+            return getCachedLearningDeckList()
         } catch (e: Exception) {
             // Fallback to cache
         }
 
-        val cachedList = dao.getDecks()
-        val decks = cachedList.map {
-            LearningDeckSummary(
-                id = it.id,
-                title = it.title,
-                description = it.description,
-                total_words = it.totalWords,
-                learned_words = it.learnedWords,
-                new_words_count = it.newWordsCount,
-                due_review_count = it.dueReviewCount,
-                last_studied_at = it.lastStudiedAt,
-                is_completed = it.isCompleted,
-                is_in_progress = it.isInProgress
-            )
-        }
-        val continueDeck = decks.find { it.is_in_progress }
-        return LearningDeckListResponse(
-            continue_deck = continueDeck,
-            decks = decks
-        )
+        return getCachedLearningDeckList()
     }
 
     private suspend fun preloadAllDecks(token: String, decks: List<LearningDeckSummary>) {
@@ -247,6 +293,10 @@ class MinLishRepository private constructor(context: Context) {
         limit: Int,
         deckId: Long?
     ): LearningSessionResponse {
+        if (deckId != null && deckId < 0) {
+            return getLocalLearningSession(mode, limit, deckId)
+        }
+
         try {
             syncPendingReviews(token)
             val response = api.getLearningSession(token, mode, limit, deckId)
@@ -280,55 +330,7 @@ class MinLishRepository private constructor(context: Context) {
             // Fallback to local offline SM-2 queue selection
         }
 
-        // Offline Session Selection Logic
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-        format.timeZone = TimeZone.getTimeZone("UTC")
-        val nowStr = format.format(Date())
-
-        var localCards = when (mode) {
-            "review" -> dao.getDueReviewCardsOffline(nowStr).map { it.copy(type = "review") }
-            "new" -> dao.getNewCardsOffline().map { it.copy(type = "new") }
-            else -> { // mixed
-                val due = dao.getDueReviewCardsOffline(nowStr).map { it.copy(type = "review") }
-                val newCards = dao.getNewCardsOffline().map { it.copy(type = "new") }
-                due + newCards
-            }
-        }
-
-        if (deckId != null) {
-            localCards = localCards.filter { it.deckId == deckId }
-        }
-
-        val cards = localCards.take(limit).map {
-            LearningCard(
-                id = it.id,
-                deck_id = it.deckId,
-                deck_title = it.deckTitle,
-                word = it.word,
-                pronunciation = it.pronunciation,
-                meaning = it.meaning,
-                description_en = it.descriptionEn,
-                example = it.example,
-                collocation = it.collocation,
-                related_words = it.relatedWords,
-                note = it.note,
-                image_url = it.imageUrl,
-                audio_url = it.audioUrl,
-                type = it.type,
-                progress = LearningCardProgress(
-                    ease_factor = it.easeFactor,
-                    repetitions = it.repetitions,
-                    interval_days = it.intervalDays,
-                    next_review_at = it.nextReviewAt
-                )
-            )
-        }
-
-        return LearningSessionResponse(
-            mode = mode,
-            count = cards.size,
-            cards = cards
-        )
+        return getLocalLearningSession(mode, limit, deckId)
     }
 
     // 6. Review Card SM-2 Algorithm & Offline queue
@@ -515,6 +517,27 @@ class MinLishRepository private constructor(context: Context) {
             )
         )
 
+        if (card.deckId < 0 || card.id < 0) {
+            dao.insertCards(
+                listOf(
+                    card.copy(
+                        easeFactor = sm2.easeFactor,
+                        repetitions = sm2.repetitions,
+                        intervalDays = sm2.intervalDays,
+                        nextReviewAt = sm2.nextReviewAt
+                    )
+                )
+            )
+            return ReviewProgressResponse(
+                card_id = request.cardId,
+                quality = request.quality,
+                ease_factor = sm2.easeFactor,
+                repetitions = sm2.repetitions,
+                interval_days = sm2.intervalDays,
+                next_review_at = sm2.nextReviewAt
+            )
+        }
+
         // Now attempt network sync
         try {
             val response = api.reviewCard(token, request)
@@ -620,6 +643,106 @@ class MinLishRepository private constructor(context: Context) {
         val intervalDays: Int,
         val nextReviewAt: String
     )
+
+
+    private suspend fun adjustLearningPlan(deltaNewWords: Int = 0, deltaDueReviews: Int = 0) {
+        if (deltaNewWords == 0 && deltaDueReviews == 0) return
+        val current = dao.getLearningPlan() ?: LearningPlanCache(
+            dailyNewWordsGoal = 20,
+            dailyReviewGoal = 50,
+            newWordsAvailable = 0,
+            dueReviewCount = 0,
+            wordsLearnedToday = 0,
+            wordsReviewedToday = 0
+        )
+        dao.insertLearningPlan(
+            current.copy(
+                newWordsAvailable = maxOf(0, current.newWordsAvailable + deltaNewWords),
+                dueReviewCount = maxOf(0, current.dueReviewCount + deltaDueReviews)
+            )
+        )
+    }
+
+    private fun newLocalId(): Long {
+        val bits = UUID.randomUUID().mostSignificantBits xor UUID.randomUUID().leastSignificantBits
+        val positive = bits and Long.MAX_VALUE
+        return -maxOf(1L, positive)
+    }
+
+    private suspend fun getCachedLearningDeckList(): LearningDeckListResponse {
+        val decks = dao.getDecks().map { it.toLearningDeckSummary() }
+        return LearningDeckListResponse(
+            continue_deck = decks.firstOrNull { it.is_in_progress },
+            decks = decks
+        )
+    }
+
+    private fun DeckEntity.toLearningDeckSummary(): LearningDeckSummary {
+        return LearningDeckSummary(
+            id = id,
+            title = title,
+            description = description,
+            total_words = totalWords,
+            learned_words = learnedWords,
+            new_words_count = newWordsCount,
+            due_review_count = dueReviewCount,
+            last_studied_at = lastStudiedAt,
+            is_completed = isCompleted,
+            is_in_progress = isInProgress
+        )
+    }
+
+    private fun CardEntity.toLearningCard(cardType: String = type): LearningCard {
+        return LearningCard(
+            id = id,
+            deck_id = deckId,
+            deck_title = deckTitle,
+            word = word,
+            pronunciation = pronunciation,
+            meaning = meaning,
+            description_en = descriptionEn,
+            example = example,
+            collocation = collocation,
+            related_words = relatedWords,
+            note = note,
+            image_url = imageUrl,
+            audio_url = audioUrl,
+            type = cardType,
+            progress = LearningCardProgress(
+                ease_factor = easeFactor,
+                repetitions = repetitions,
+                interval_days = intervalDays,
+                next_review_at = nextReviewAt
+            )
+        )
+    }
+
+    private suspend fun getLocalLearningSession(mode: String, limit: Int, deckId: Long?): LearningSessionResponse {
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+        format.timeZone = TimeZone.getTimeZone("UTC")
+        val nowStr = format.format(Date())
+
+        var localCards = when (mode) {
+            "review" -> dao.getDueReviewCardsOffline(nowStr).map { it to "review" }
+            "new" -> dao.getNewCardsOffline().map { it to "new" }
+            else -> {
+                val due = dao.getDueReviewCardsOffline(nowStr).map { it to "review" }
+                val newCards = dao.getNewCardsOffline().map { it to "new" }
+                due + newCards
+            }
+        }
+
+        if (deckId != null) {
+            localCards = localCards.filter { it.first.deckId == deckId }
+        }
+
+        val cards = localCards.take(limit).map { (card, cardType) -> card.toLearningCard(cardType) }
+        return LearningSessionResponse(
+            mode = mode,
+            count = cards.size,
+            cards = cards
+        )
+    }
 
     // 7. Profile Cache & Sync
     suspend fun getProfile(token: String): ProfileResponse {

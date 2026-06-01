@@ -621,7 +621,7 @@ fun QuickActionsRow(onImportExportClick: () -> Unit, onLearningClick: (String) -
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        QuickActionButton(Icons.Default.UploadFile, "Import", onClick = onImportExportClick, modifier = Modifier.weight(1f))
+        QuickActionButton(Icons.Default.UploadFile, "Nhập/Xuất", onClick = onImportExportClick, modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Add, "Từ mới", onClick = { onLearningClick("new") }, modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Replay, "Ôn tập", onClick = { onLearningClick("review") }, modifier = Modifier.weight(1f))
         QuickActionButton(Icons.Default.Edit, "Luyện tập", onClick = { onLearningClick("mixed") }, modifier = Modifier.weight(1f))
@@ -911,5 +911,5 @@ private fun deckAccentColor(deckId: Long): Color {
         Color(0xFFEF6C00),
         Color(0xFF43A047)
     )
-    return colors[(deckId % colors.size).toInt()]
+    return colors[Math.floorMod(deckId, colors.size.toLong()).toInt()]
 }

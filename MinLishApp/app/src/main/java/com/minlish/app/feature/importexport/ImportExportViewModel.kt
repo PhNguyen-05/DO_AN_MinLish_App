@@ -9,18 +9,21 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.WordFileParser
-import com.minlish.app.data.local.WordSetRepository
-import com.minlish.app.data.model.ImportSummary
+import com.minlish.app.data.local.WordPdfExporter
 import com.minlish.app.data.model.WordSet
+import com.minlish.app.data.repository.WordImportExportRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.UUID
 
 class ImportExportViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = WordSetRepository(application)
 
-    var wordSets by mutableStateOf<List<WordSet>>(repository.getWordSets())
+    private val repository = WordImportExportRepository(application)
+    private val exportPrefs = application.getSharedPreferences(PREF_EXPORT, Application.MODE_PRIVATE)
+
+    var wordSets by mutableStateOf(repository.getWordSets())
         private set
 
     var selectedWordSetId by mutableStateOf<String?>(wordSets.firstOrNull()?.id)
@@ -35,11 +38,28 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
     var error by mutableStateOf("")
         private set
 
-    var lastImportSummary by mutableStateOf<ImportSummary?>(null)
+    var lastExportFileName by mutableStateOf("")
+        private set
+
+    var lastExportPdfFile by mutableStateOf<File?>(null)
+        private set
+
+    var showPdfPreview by mutableStateOf(false)
         private set
 
     val selectedWordSet: WordSet?
         get() = wordSets.firstOrNull { it.id == selectedWordSetId }
+
+    val hasExportReady: Boolean
+        get() = lastExportPdfFile?.exists() == true
+
+    init {
+        restoreLastExportFromCache()
+        viewModelScope.launch {
+            repository.syncLegacySetsToLearning()
+            refresh()
+        }
+    }
 
     fun selectWordSet(id: String) {
         selectedWordSetId = id
@@ -47,32 +67,37 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
         error = ""
     }
 
+    fun dismissPdfPreview() {
+        showPdfPreview = false
+    }
+
+    fun showPdfPreview() {
+        if (lastExportPdfFile?.exists() == true) {
+            showPdfPreview = true
+        }
+    }
+
     fun importFromUri(uri: Uri) {
         loading = true
         message = ""
         error = ""
-        lastImportSummary = null
         viewModelScope.launch {
             try {
-                val context = getApplication<Application>()
-                val fileName = context.displayName(uri)
+                val app = getApplication<Application>()
+                val fileName = app.displayName(uri)
                 val parsed = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.use { input ->
-                        if (fileName.endsWith(".xlsx", ignoreCase = true)) {
-                            WordFileParser.parseXlsx(input)
-                        } else {
-                            WordFileParser.parseCsv(input.readBytes().toString(Charsets.UTF_8))
-                        }
-                    } ?: error("Không đọc được file đã chọn.")
+                    app.contentResolver.openInputStream(uri)?.use { input ->
+                        WordFileParser.parse(fileName, input)
+                    } ?: error("Không đọc được file.")
                 }
 
                 if (parsed.words.isEmpty()) {
-                    error = "Không tìm thấy dòng hợp lệ. File cần có ít nhất cột word và meaning."
+                    error = "Không tìm thấy từ hợp lệ. File cần cột word và meaning."
                     return@launch
                 }
 
                 val now = System.currentTimeMillis()
-                val wordSet = WordSet(
+                val draft = WordSet(
                     id = UUID.randomUUID().toString(),
                     name = fileName.substringBeforeLast('.').ifBlank { "Bộ từ mới" },
                     sourceFileName = fileName,
@@ -80,19 +105,12 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
                     updatedAt = now,
                     words = parsed.words
                 )
-                repository.saveWordSet(wordSet)
-                refresh(selectedId = wordSet.id)
 
-                lastImportSummary = ImportSummary(
-                    fileName = fileName,
-                    validCount = parsed.words.size,
-                    skippedCount = parsed.skippedCount,
-                    duplicateCount = parsed.duplicateCount,
-                    message = "Đã nhập ${parsed.words.size} từ vào bộ \"${wordSet.name}\"."
-                )
-                message = lastImportSummary?.message.orEmpty()
+                val saved = repository.importWordSet(draft)
+                refresh(selectedId = saved.id)
+                message = buildImportMessage(saved.name, parsed.words.size, parsed.skippedCount, parsed.duplicateCount)
             } catch (e: Exception) {
-                error = e.localizedMessage ?: "Import thất bại. Vui lòng kiểm tra định dạng file."
+                error = e.toImportErrorMessage()
             } finally {
                 loading = false
             }
@@ -101,7 +119,7 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
 
     fun exportSelectedToUri(uri: Uri) {
         val wordSet = selectedWordSet ?: run {
-            error = "Chưa có bộ từ để export."
+            error = "Chọn một bộ từ trước khi xuất."
             return
         }
         loading = true
@@ -109,15 +127,32 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
         error = ""
         viewModelScope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    val csv = WordFileParser.toCsv(wordSet.name, wordSet.words)
-                    getApplication<Application>().contentResolver.openOutputStream(uri)?.use { output ->
-                        output.write(csv.toByteArray(Charsets.UTF_8))
-                    } ?: error("Không ghi được file export.")
+                val app = getApplication<Application>()
+                val fileName = "${wordSet.name.safeFileName()}.pdf"
+
+                val cacheFile = withContext(Dispatchers.IO) {
+                    val exportDir = File(app.cacheDir, "exports").apply { mkdirs() }
+                    val pdfFile = File(exportDir, fileName)
+                    WordPdfExporter.writeToFile(wordSet.name, wordSet.words, pdfFile)
+
+                    app.contentResolver.openOutputStream(uri)?.use { output ->
+                        pdfFile.inputStream().use { input -> input.copyTo(output) }
+                    } ?: error("Không ghi được file PDF.")
+
+                    exportPrefs.edit()
+                        .putString(KEY_CACHE_FILE, pdfFile.absolutePath)
+                        .putString(KEY_FILE_NAME, fileName)
+                        .apply()
+
+                    pdfFile
                 }
-                message = "Đã export ${wordSet.words.size} từ từ bộ \"${wordSet.name}\"."
+
+                lastExportPdfFile = cacheFile
+                lastExportFileName = fileName
+                showPdfPreview = true
+                message = "Đã xuất PDF (${wordSet.words.size} từ) vào Downloads. Bấm «Xem PDF» hoặc mở file .pdf trong Downloads."
             } catch (e: Exception) {
-                error = e.localizedMessage ?: "Export thất bại."
+                error = e.localizedMessage ?: "Export PDF thất bại."
             } finally {
                 loading = false
             }
@@ -126,11 +161,28 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
 
     fun deleteSelectedWordSet() {
         val id = selectedWordSetId ?: return
-        repository.deleteWordSet(id)
-        refresh()
-        message = "Đã xóa bộ từ."
+        loading = true
+        message = ""
         error = ""
-        lastImportSummary = null
+        viewModelScope.launch {
+            try {
+                repository.deleteWordSet(id)
+                refresh()
+                message = "Đã xóa bộ từ."
+            } catch (e: Exception) {
+                error = e.localizedMessage ?: "Không xóa được bộ từ."
+            } finally {
+                loading = false
+            }
+        }
+    }
+
+    private fun restoreLastExportFromCache() {
+        val path = exportPrefs.getString(KEY_CACHE_FILE, null) ?: return
+        val file = File(path)
+        if (!file.exists() || !file.name.endsWith(".pdf", ignoreCase = true)) return
+        lastExportPdfFile = file
+        lastExportFileName = exportPrefs.getString(KEY_FILE_NAME, file.name) ?: file.name
     }
 
     private fun refresh(selectedId: String? = null) {
@@ -138,11 +190,40 @@ class ImportExportViewModel(application: Application) : AndroidViewModel(applica
         selectedWordSetId = selectedId ?: wordSets.firstOrNull()?.id
     }
 
+    private fun buildImportMessage(name: String, valid: Int, skipped: Int, duplicate: Int): String {
+        val extra = buildList {
+            if (skipped > 0) add("$skipped dòng bỏ qua")
+            if (duplicate > 0) add("$duplicate từ trùng")
+        }
+        val suffix = if (extra.isEmpty()) "" else " (${extra.joinToString(", ")})"
+        return "Đã nhập $valid từ vào \"$name\"$suffix. Vào Trang chủ để học bộ này."
+    }
+
     private fun Application.displayName(uri: Uri): String {
-        val fallback = uri.lastPathSegment?.substringAfterLast('/') ?: "word_set.csv"
+        val fallback = uri.lastPathSegment?.substringAfterLast('/') ?: "bo_tu.csv"
         return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
             if (cursor.moveToFirst() && nameIndex >= 0) cursor.getString(nameIndex) else fallback
         } ?: fallback
+    }
+
+    private fun String.safeFileName(): String {
+        return replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "minlish_bo_tu" }
+    }
+
+    private fun Exception.toImportErrorMessage(): String {
+        val raw = localizedMessage.orEmpty()
+        return when {
+            raw.isBlank() -> "Import thất bại. Kiểm tra định dạng file."
+            raw.startsWith("http://") || raw.startsWith("https://") ->
+                "Không đọc được file Excel. Hãy dùng CSV hoặc .xlsx."
+            else -> raw
+        }
+    }
+
+    private companion object {
+        const val PREF_EXPORT = "minlish_last_export"
+        const val KEY_CACHE_FILE = "cache_file_path"
+        const val KEY_FILE_NAME = "file_name"
     }
 }

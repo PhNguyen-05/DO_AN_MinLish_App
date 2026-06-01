@@ -16,7 +16,8 @@ data class WordSet(
     val sourceFileName: String = "",
     val createdAt: Long,
     val updatedAt: Long,
-    val words: List<WordItem>
+    val words: List<WordItem>,
+    val deckId: Long? = null
 )
 
 data class ImportSummary(
