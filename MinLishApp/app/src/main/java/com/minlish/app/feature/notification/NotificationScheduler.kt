@@ -34,12 +34,39 @@ object NotificationScheduler {
         ReminderPreferences.setDailyPushEnabled(context, true)
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            nextTriggerAt(hour, minute),
-            AlarmManager.INTERVAL_DAY,
-            reminderPendingIntent(context)
+        val pendingIntent = reminderPendingIntent(context)
+        alarmManager.cancel(pendingIntent)
+        val triggerAt = nextTriggerAt(hour, minute)
+        if (canScheduleExactReminders(context)) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+        } else {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+        }
+    }
+
+    fun canScheduleExactReminders(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return alarmManager.canScheduleExactAlarms()
+    }
+
+    fun restoreDailyReminder(context: Context) {
+        if (!ReminderPreferences.isDailyPushEnabled(context)) return
+
+        scheduleDailyReminder(
+            context = context,
+            hour = ReminderPreferences.getReminderHour(context),
+            minute = ReminderPreferences.getReminderMinute(context)
         )
+    }
+
+    fun syncDailyReminder(context: Context, enabled: Boolean, hour: Int, minute: Int) {
+        ReminderPreferences.saveReminderTime(context, hour, minute)
+        if (enabled) {
+            scheduleDailyReminder(context, hour, minute)
+        } else {
+            cancelDailyReminder(context)
+        }
     }
 
     fun cancelDailyReminder(context: Context) {

@@ -14,6 +14,12 @@ class StudyReminderReceiver : BroadcastReceiver() {
         val isPushEnabled = ReminderPreferences.isDailyPushEnabled(ctx)
         if (!isPushEnabled) return
 
+        NotificationScheduler.scheduleDailyReminder(
+            context = ctx,
+            hour = ReminderPreferences.getReminderHour(ctx),
+            minute = ReminderPreferences.getReminderMinute(ctx)
+        )
+
         val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val lastUpdateDate = ReminderPreferences.getLastUpdateDate(ctx)
 

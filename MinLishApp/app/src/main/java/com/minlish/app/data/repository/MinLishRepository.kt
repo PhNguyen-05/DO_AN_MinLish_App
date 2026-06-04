@@ -837,8 +837,11 @@ class MinLishRepository private constructor(context: Context) {
                 )
             )
             return response
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            // Save local cache even if offline
+            // Keep the local reminder usable offline, but let the UI report that
+            // server-side email settings have not been synchronized.
             val current = dao.getUserSettings()
             val localSettings = UserSettingsCache(
                 theme = request.theme ?: current?.theme ?: "system",
@@ -849,14 +852,7 @@ class MinLishRepository private constructor(context: Context) {
                 dailyReviewGoal = request.dailyReviewGoal ?: current?.dailyReviewGoal ?: 50
             )
             dao.insertUserSettings(localSettings)
-            return UserSettingsResponse(
-                theme = localSettings.theme,
-                daily_reminder_time = localSettings.dailyReminderTime,
-                notifications_enabled = localSettings.notificationsEnabled,
-                email_notifications_enabled = localSettings.emailNotificationsEnabled,
-                daily_new_words_goal = localSettings.dailyNewWordsGoal,
-                daily_review_goal = localSettings.dailyReviewGoal
-            )
+            throw e
         }
     }
 

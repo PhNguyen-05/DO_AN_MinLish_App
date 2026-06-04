@@ -11,7 +11,12 @@ import com.minlish.app.data.model.ProfileUpdateRequest
 import com.minlish.app.data.model.UserSettingsRequest
 import com.minlish.app.data.repository.MinLishRepository
 import com.minlish.app.data.remote.RetrofitClient
+import com.minlish.app.feature.notification.NotificationScheduler
+import com.minlish.app.feature.notification.ReminderPreferences
 import android.content.Context
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -55,12 +60,22 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     var sendingTestEmail by mutableStateOf(false)
         private set
     var emailTestResult by mutableStateOf("")
+    private var reminderSettingsSaveJob: Job? = null
 
-    fun onPushEnabledChange(value: Boolean) { pushEnabled = value }
-    fun onEmailEnabledChange(value: Boolean) { emailEnabled = value }
+    fun onPushEnabledChange(value: Boolean) {
+        pushEnabled = value
+        persistReminderSettings()
+    }
+
+    fun onEmailEnabledChange(value: Boolean) {
+        emailEnabled = value
+        persistReminderSettings()
+    }
+
     fun onReminderTimeChange(hour: Int, minute: Int) {
         reminderHour = hour
         reminderMinute = minute
+        persistReminderSettings()
     }
     fun clearEmailTestResult() { emailTestResult = "" }
 
@@ -87,6 +102,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 val timeParts = settings.daily_reminder_time?.split(":") ?: listOf("20", "00")
                 reminderHour = timeParts.getOrNull(0)?.toIntOrNull() ?: 20
                 reminderMinute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+                applyReminderSettingsLocally(getApplication())
             } catch (e: Exception) {
                 android.util.Log.e("ProfileViewModel", "Error loading profile/settings", e)
                 error = "Không thể tải hồ sơ hoặc cài đặt nhắc nhở: ${e.message ?: e.localizedMessage ?: e.toString()}"
@@ -128,29 +144,8 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 )
                 val res = repository.updateProfile(token, req)
 
-                // Update settings on backend
-                val timeStr = String.format(java.util.Locale.US, "%02d:%02d:00", reminderHour, reminderMinute)
-                val settingsReq = UserSettingsRequest(
-                    theme = "system",
-                    dailyReminderTime = timeStr,
-                    notificationsEnabled = pushEnabled,
-                    emailNotificationsEnabled = emailEnabled,
-                    dailyNewWordsGoal = 20,
-                    dailyReviewGoal = 50
-                )
-                repository.updateSettings(token, settingsReq)
-
-                // Schedule local alarm
-                if (pushEnabled) {
-                    com.minlish.app.feature.notification.NotificationScheduler.scheduleDailyReminder(context, reminderHour, reminderMinute)
-                } else {
-                    com.minlish.app.feature.notification.NotificationScheduler.cancelDailyReminder(context)
-                }
-
-                // Save locally to preferences
-                com.minlish.app.feature.notification.ReminderPreferences.setDailyPushEnabled(context, pushEnabled)
-                com.minlish.app.feature.notification.ReminderPreferences.setEmailNotificationsEnabled(context, emailEnabled)
-                com.minlish.app.feature.notification.ReminderPreferences.saveReminderTime(context, reminderHour, reminderMinute)
+                applyReminderSettingsLocally(context)
+                repository.updateSettings(token, reminderSettingsRequest())
 
                 if (res.isSuccessful) {
                     res.body()?.let { updated ->
@@ -212,6 +207,40 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         reminderMinute = 0
         sendingTestEmail = false
         emailTestResult = ""
+        reminderSettingsSaveJob?.cancel()
+        reminderSettingsSaveJob = null
+    }
+
+    private fun persistReminderSettings() {
+        applyReminderSettingsLocally(getApplication())
+        val token = UserSession.token ?: return
+
+        reminderSettingsSaveJob?.cancel()
+        reminderSettingsSaveJob = viewModelScope.launch {
+            delay(400)
+            try {
+                repository.updateSettings(token, reminderSettingsRequest())
+                error = ""
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                error = "Đã lưu lịch nhắc trên thiết bị nhưng chưa thể đồng bộ email với server: ${e.localizedMessage}"
+            }
+        }
+    }
+
+    private fun reminderSettingsRequest(): UserSettingsRequest {
+        val time = String.format(java.util.Locale.US, "%02d:%02d:00", reminderHour, reminderMinute)
+        return UserSettingsRequest(
+            dailyReminderTime = time,
+            notificationsEnabled = pushEnabled,
+            emailNotificationsEnabled = emailEnabled
+        )
+    }
+
+    private fun applyReminderSettingsLocally(context: Context) {
+        ReminderPreferences.setEmailNotificationsEnabled(context, emailEnabled)
+        NotificationScheduler.syncDailyReminder(context, pushEnabled, reminderHour, reminderMinute)
     }
 
     private fun String.toApiErrorMessage(): String? {

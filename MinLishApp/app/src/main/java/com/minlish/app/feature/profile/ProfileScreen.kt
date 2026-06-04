@@ -2,11 +2,13 @@ package com.minlish.app.feature.profile
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.minlish.app.feature.notification.NotificationScheduler
 import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
 
@@ -63,10 +66,28 @@ fun ProfileScreen(
             }
         }
     }
+    val exactAlarmPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        NotificationScheduler.restoreDailyReminder(context)
+    }
+    val requestExactAlarmPermission = {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            !NotificationScheduler.canScheduleExactReminders(context)
+        ) {
+            exactAlarmPermissionLauncher.launch(
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                }
+            )
+        }
+    }
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         viewModel.onPushEnabledChange(granted)
+        if (granted) requestExactAlarmPermission()
     }
 
     LaunchedEffect(Unit) { viewModel.loadProfile() }
@@ -263,6 +284,7 @@ fun ProfileScreen(
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
                                 viewModel.onPushEnabledChange(enabled)
+                                if (enabled) requestExactAlarmPermission()
                             }
                         },
                         colors = SwitchDefaults.colors(checkedThumbColor = primaryColor, checkedTrackColor = primaryColor.copy(alpha = 0.5f))
@@ -303,6 +325,7 @@ fun ProfileScreen(
                         context,
                         { _, hourOfDay, minuteOfHour ->
                             viewModel.onReminderTimeChange(hourOfDay, minuteOfHour)
+                            if (viewModel.pushEnabled) requestExactAlarmPermission()
                         },
                         viewModel.reminderHour,
                         viewModel.reminderMinute,

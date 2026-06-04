@@ -30,7 +30,6 @@ module.exports = {
     },
     notifications: {
         enableEmailReminders: process.env.ENABLE_EMAIL_REMINDERS === 'true',
-        dailyReminderHour: process.env.REMINDER_EMAIL_HOUR ? parseInt(process.env.REMINDER_EMAIL_HOUR, 10) : 20,
-        dailyReminderMinute: process.env.REMINDER_EMAIL_MINUTE ? parseInt(process.env.REMINDER_EMAIL_MINUTE, 10) : 0
+        timeZone: process.env.REMINDER_TIME_ZONE || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
     }
 };

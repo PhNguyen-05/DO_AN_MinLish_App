@@ -21,6 +21,7 @@ import com.minlish.app.feature.importexport.ImportExportScreen
 import com.minlish.app.feature.importexport.ImportExportViewModel
 import com.minlish.app.feature.learning.LearningScreen
 import com.minlish.app.feature.learning.LearningViewModel
+import com.minlish.app.feature.notification.NotificationScheduler
 import com.minlish.app.feature.profile.ProfileScreen
 import com.minlish.app.feature.profile.ProfileViewModel
 import com.minlish.app.ui.theme.MinLishAppTheme
@@ -30,6 +31,7 @@ import java.net.URLEncoder
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NotificationScheduler.restoreDailyReminder(this)
         setContent {
             MinLishAppTheme {
                 MinLishAppNavigation()
@@ -139,6 +141,7 @@ fun MinLishAppNavigation() {
                 viewModel = profileViewModel,
                 onBack = { navController.popBackStack() },
                 onLogout = {
+                    NotificationScheduler.cancelDailyReminder(context)
                     authViewModel.logout()
                     homeViewModel.resetState()
                     profileViewModel.resetState()

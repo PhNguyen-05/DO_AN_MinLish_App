@@ -13,10 +13,16 @@ import com.minlish.app.data.model.LearningPlanResponse
 import com.minlish.app.data.model.NotificationSummaryResponse
 import com.minlish.app.data.model.ProgressResponse
 import com.minlish.app.data.repository.MinLishRepository
+import com.minlish.app.feature.notification.NotificationScheduler
+import com.minlish.app.feature.notification.ReminderPreferences
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = MinLishRepository.getInstance(application)
+    private val appContext = application.applicationContext
+    private var reminderSettingsSynced = false
+    private var reminderSettingsSyncing = false
 
     var dashboardState by mutableStateOf<DashboardResponse?>(null)
         private set
@@ -36,6 +42,36 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun fetchDashboardData() {
         val token = UserSession.token ?: return
         viewModelScope.launch {
+            if (!reminderSettingsSynced && !reminderSettingsSyncing) {
+                reminderSettingsSyncing = true
+                launch {
+                    try {
+                        val settings = repository.getSettings(token)
+                        val timeParts = settings.daily_reminder_time?.split(":").orEmpty()
+                        val hour = timeParts.getOrNull(0)?.toIntOrNull() ?: 20
+                        val minute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+
+                        ReminderPreferences.setEmailNotificationsEnabled(
+                            appContext,
+                            settings.email_notifications_enabled == 1
+                        )
+                        NotificationScheduler.syncDailyReminder(
+                            context = appContext,
+                            enabled = settings.notifications_enabled == 1,
+                            hour = hour,
+                            minute = minute
+                        )
+                        reminderSettingsSynced = true
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        // Retry the settings sync the next time the dashboard refreshes.
+                    } finally {
+                        reminderSettingsSyncing = false
+                    }
+                }
+            }
+
             // 1. Sync pending reviews sequentially first to prevent race conditions
             try {
                 repository.syncPendingReviews(token)
@@ -88,5 +124,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         learningDecksState = LearningDeckListResponse()
         progressState = null
         notificationSummaryState = null
+        reminderSettingsSynced = false
+        reminderSettingsSyncing = false
     }
 }

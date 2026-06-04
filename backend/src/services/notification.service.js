@@ -36,16 +36,18 @@ async function sendStudyReminderEmail(userId) {
     };
 }
 
-async function sendDailyReminderEmails() {
+async function sendDueReminderEmails(reminderTime) {
     const [users] = await db.query(`
         SELECT u.id
         FROM users u
         JOIN user_settings us ON u.id = us.user_id
         WHERE u.email IS NOT NULL AND u.email <> ''
           AND us.email_notifications_enabled = 1
-    `);
+          AND TIME_FORMAT(us.daily_reminder_time, '%H:%i') = ?
+    `, [reminderTime]);
 
     let sent = 0;
+    let skipped = 0;
     let failed = 0;
 
     for (const user of users) {
@@ -60,6 +62,8 @@ async function sendDailyReminderEmails() {
             if (needsReminder) {
                 await sendStudyReminderEmail(user.id);
                 sent += 1;
+            } else {
+                skipped += 1;
             }
         } catch (err) {
             failed += 1;
@@ -67,7 +71,7 @@ async function sendDailyReminderEmails() {
         }
     }
 
-    return { sent, failed };
+    return { due: users.length, sent, skipped, failed };
 }
 
 function buildReminderBody(newWordsAvailable, dueReviewCount) {
@@ -85,5 +89,5 @@ function buildReminderBody(newWordsAvailable, dueReviewCount) {
 module.exports = {
     getNotificationSummary,
     sendStudyReminderEmail,
-    sendDailyReminderEmails
+    sendDueReminderEmails
 };
