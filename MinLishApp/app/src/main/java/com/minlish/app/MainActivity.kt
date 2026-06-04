@@ -79,6 +79,11 @@ fun MinLishAppNavigation() {
                         popUpTo("register") { inclusive = true }
                         launchSingleTop = true
                     }
+                },
+                onGoogleAuthSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("register") { inclusive = true }
+                    }
                 }
             )
         }

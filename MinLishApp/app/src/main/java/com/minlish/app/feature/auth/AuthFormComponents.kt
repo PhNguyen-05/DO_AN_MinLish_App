@@ -43,6 +43,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -75,6 +76,7 @@ internal val AuthPrimaryDark = Color(0xFF147A70)
 internal val AuthBackground = Color(0xFFF6FAF8)
 internal val AuthSurface = Color.White
 internal val AuthBorder = Color(0xFFDDE7E3)
+internal val AuthTextStrong = Color(0xFF102421)
 internal val AuthTextMuted = Color(0xFF61706B)
 internal val AuthErrorContainer = Color(0xFFFFECEC)
 internal val AuthSuccessContainer = Color(0xFFE7F7EF)
@@ -242,13 +244,17 @@ internal fun AuthTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { Text(label, fontWeight = FontWeight.SemiBold) },
         leadingIcon = {
             Icon(leadingIcon, contentDescription = null, tint = AuthPrimaryDark)
         },
         isError = isError,
         singleLine = singleLine,
         shape = RoundedCornerShape(8.dp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = AuthTextStrong,
+            fontWeight = FontWeight.SemiBold
+        ),
         colors = authTextFieldColors(),
         modifier = modifier.fillMaxWidth()
     )
@@ -268,7 +274,7 @@ internal fun AuthPasswordField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { Text(label, fontWeight = FontWeight.SemiBold) },
         leadingIcon = {
             Icon(leadingIcon, contentDescription = null, tint = AuthPrimaryDark)
         },
@@ -285,6 +291,10 @@ internal fun AuthPasswordField(
         isError = isError,
         singleLine = true,
         shape = RoundedCornerShape(8.dp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = AuthTextStrong,
+            fontWeight = FontWeight.SemiBold
+        ),
         colors = authTextFieldColors(),
         modifier = modifier.fillMaxWidth()
     )
@@ -323,6 +333,85 @@ internal fun AuthPrimaryButton(
         } else {
             Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }
+    }
+}
+
+@Composable
+internal fun AuthGoogleButton(
+    text: String,
+    loading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled && !loading,
+        shape = RoundedCornerShape(8.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AuthBorder),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color.White,
+            contentColor = AuthTextStrong
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp)
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+                color = AuthPrimaryDark
+            )
+        } else {
+            GoogleMark()
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text = text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
+internal fun AuthDivider(text: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .height(1.dp)
+                .weight(1f)
+                .background(AuthBorder)
+        )
+        Text(
+            text = text,
+            color = AuthTextMuted,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        Box(
+            modifier = Modifier
+                .height(1.dp)
+                .weight(1f)
+                .background(AuthBorder)
+        )
+    }
+}
+
+@Composable
+private fun GoogleMark() {
+    Row(
+        modifier = Modifier.size(22.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "G",
+            color = Color(0xFF4285F4),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -433,8 +522,14 @@ internal fun AuthFooterLink(text: String, actionText: String, onClick: () -> Uni
 
 @Composable
 private fun authTextFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = AuthTextStrong,
+    unfocusedTextColor = AuthTextStrong,
+    disabledTextColor = AuthTextStrong.copy(alpha = 0.62f),
+    errorTextColor = AuthTextStrong,
     focusedBorderColor = AuthPrimary,
     unfocusedBorderColor = AuthBorder,
     focusedLabelColor = AuthPrimaryDark,
+    unfocusedLabelColor = AuthTextMuted,
+    errorLabelColor = MaterialTheme.colorScheme.error,
     cursorColor = AuthPrimaryDark
 )

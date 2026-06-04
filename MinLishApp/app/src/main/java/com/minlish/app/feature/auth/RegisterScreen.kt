@@ -52,7 +52,8 @@ import kotlin.math.roundToInt
 @Composable
 fun RegisterScreen(
     viewModel: AuthViewModel,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onGoogleAuthSuccess: () -> Unit
 ) {
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -64,6 +65,10 @@ fun RegisterScreen(
     var formSubmitted by remember { mutableStateOf(false) }
     var avatarUri by remember { mutableStateOf<Uri?>(null) }
     var avatarError by remember { mutableStateOf("") }
+    val startGoogleSignIn = rememberGoogleSignInHandler(
+        onIdToken = { idToken -> viewModel.loginWithGoogle(idToken, onGoogleAuthSuccess) },
+        onError = viewModel::showGoogleAuthError
+    )
 
     val context = LocalContext.current
     val passwordError = viewModel.validatePassword(password)
@@ -227,6 +232,16 @@ fun RegisterScreen(
                     }
                 )
             }
+        )
+
+        AuthDivider(text = "Hoặc")
+
+        AuthMessage(text = viewModel.googleAuthError, isError = true)
+
+        AuthGoogleButton(
+            text = "Tiếp tục với Google",
+            loading = viewModel.googleAuthLoading,
+            onClick = startGoogleSignIn
         )
     }
 }

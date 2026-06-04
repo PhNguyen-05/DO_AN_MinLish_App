@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.UserSession
+import com.minlish.app.data.model.AuthResponse
+import com.minlish.app.data.model.GoogleAuthRequest
 import com.minlish.app.data.model.RegisterRequest
 import com.minlish.app.data.remote.RetrofitClient
 import java.io.IOException
@@ -31,6 +33,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     var registerError by mutableStateOf("")
         private set
     var registerLoading by mutableStateOf(false)
+        private set
+
+    var googleAuthError by mutableStateOf("")
+        private set
+    var googleAuthLoading by mutableStateOf(false)
         private set
 
     var forgotMessage by mutableStateOf("")
@@ -74,13 +81,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 val response = RetrofitClient.instance.login(
                     mapOf("email" to normalizedEmail, "password" to password)
                 )
-                val token = "Bearer ${response.token}"
-                UserSession.token = token
-                
-                // Save token to SharedPreferences for offline auto-login
-                val prefs = getApplication<Application>()
-                    .getSharedPreferences("minlish_auth", android.content.Context.MODE_PRIVATE)
-                prefs.edit().putString("token", token).apply()
+                saveAuthSession(response)
 
                 loginError = ""
                 onSuccess()
@@ -96,6 +97,40 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 loginLoading = false
             }
         }
+    }
+
+    fun loginWithGoogle(idToken: String, onSuccess: () -> Unit) {
+        if (idToken.isBlank()) {
+            googleAuthError = "Không nhận được mã xác thực Google. Vui lòng thử lại."
+            return
+        }
+
+        googleAuthLoading = true
+        googleAuthError = ""
+        loginError = ""
+        registerError = ""
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.instance.loginWithGoogle(GoogleAuthRequest(idToken))
+                saveAuthSession(response)
+                googleAuthError = ""
+                onSuccess()
+            } catch (e: HttpException) {
+                googleAuthError = e.response()?.errorBody().toApiErrorMessage()
+                    ?: "Đăng nhập Google thất bại. Vui lòng thử lại."
+            } catch (e: IOException) {
+                googleAuthError = "Không kết nối được server. Kiểm tra backend đã chạy chưa."
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "google login failed", e)
+                googleAuthError = "Đăng nhập Google thất bại. Vui lòng thử lại."
+            } finally {
+                googleAuthLoading = false
+            }
+        }
+    }
+
+    fun showGoogleAuthError(message: String) {
+        googleAuthError = message
     }
 
     fun register(email: String, password: String, fullName: String, targetGoal: String) {
@@ -257,6 +292,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun clearRegisterState() {
         registerMessage = ""
         registerError = ""
+        googleAuthError = ""
     }
 
     fun clearForgotState() {
@@ -272,6 +308,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         loginError = ""
         registerMessage = ""
         registerError = ""
+        googleAuthError = ""
         forgotMessage = ""
         forgotError = ""
 
@@ -282,6 +319,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 Log.e("AuthViewModel", "Failed to clear Room database on logout", e)
             }
         }
+    }
+
+    private fun saveAuthSession(response: AuthResponse) {
+        val token = "Bearer ${response.token}"
+        UserSession.token = token
+
+        val prefs = getApplication<Application>()
+            .getSharedPreferences("minlish_auth", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putString("token", token).apply()
     }
 
     private fun ResponseBody?.toApiErrorMessage(): String? {

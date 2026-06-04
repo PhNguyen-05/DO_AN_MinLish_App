@@ -13,6 +13,7 @@ module.exports = {
     rootDir,
     port: process.env.PORT || 3000,
     jwtSecret: process.env.JWT_SECRET || 'minlish_super_secret_key_2026',
+    googleClientId: process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_WEB_CLIENT_ID || '',
     db: {
         host: process.env.DB_HOST || 'localhost',
         user: process.env.DB_USER || 'root',

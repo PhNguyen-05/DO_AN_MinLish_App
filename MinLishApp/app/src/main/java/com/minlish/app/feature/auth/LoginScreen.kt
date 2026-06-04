@@ -26,6 +26,10 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val startGoogleSignIn = rememberGoogleSignInHandler(
+        onIdToken = { idToken -> viewModel.loginWithGoogle(idToken, onLoginSuccess) },
+        onError = viewModel::showGoogleAuthError
+    )
 
     AuthPage(
         title = "Đăng nhập",
@@ -60,6 +64,16 @@ fun LoginScreen(
             text = "Đăng nhập",
             loading = viewModel.loginLoading,
             onClick = { viewModel.login(email, password, onLoginSuccess) }
+        )
+
+        AuthDivider(text = "Hoặc")
+
+        AuthMessage(text = viewModel.googleAuthError, isError = true)
+
+        AuthGoogleButton(
+            text = "Tiếp tục với Google",
+            loading = viewModel.googleAuthLoading,
+            onClick = startGoogleSignIn
         )
 
         Row(

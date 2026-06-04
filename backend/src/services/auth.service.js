@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const env = require('../config/env');
@@ -7,51 +9,13 @@ const { createHttpError } = require('../utils/httpError');
 const otpService = require('./otp.service');
 const mailService = require('./mail.service');
 
-async function registerUser(payload) {
-    const { email, passwordHash, fullName, targetGoal, avatarBase64, avatarMimeType } = payload;
+const googleClient = new OAuth2Client();
 
-    if (!email || !passwordHash || !fullName) {
-        throw createHttpError(400, 'Vui lòng nhập đầy đủ các trường thông tin bắt buộc!');
-    }
-
-    const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-    if (existingUsers.length > 0) {
-        throw createHttpError(400, 'Email này đã tồn tại trong hệ thống!');
-    }
-
-    const encryptedPassword = await bcrypt.hash(passwordHash, 10);
-    const avatarUrl = saveAvatarFromBase64(avatarBase64, avatarMimeType);
-
-    const [userResult] = await db.query(
-        'INSERT INTO users (email, password_hash, full_name, target_goal, avatar_url) VALUES (?, ?, ?, ?, ?)',
-        [email, encryptedPassword, fullName, targetGoal || 'TOEIC 700', avatarUrl]
-    );
-    const userId = userResult.insertId;
-
-    await db.query('INSERT INTO user_settings (user_id) VALUES (?)', [userId]);
-    await db.query('INSERT INTO user_statistics (user_id) VALUES (?)', [userId]);
-
-    return { message: 'Đăng ký tài khoản MinLish thành công!' };
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
 }
 
-async function loginUser(payload) {
-    const { email, password } = payload;
-
-    if (!email || !password) {
-        throw createHttpError(400, 'Vui lòng cung cấp đầy đủ email và mật khẩu!');
-    }
-
-    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (users.length === 0) {
-        throw createHttpError(400, 'Tài khoản hoặc mật khẩu không chính xác!');
-    }
-
-    const user = users[0];
-    const isMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isMatch) {
-        throw createHttpError(400, 'Tài khoản hoặc mật khẩu không chính xác!');
-    }
-
+function createAuthResponse(user) {
     const token = jwt.sign({ id: user.id, email: user.email }, env.jwtSecret, { expiresIn: '30d' });
 
     return {
@@ -63,6 +27,123 @@ async function loginUser(payload) {
             avatar_url: user.avatar_url
         }
     };
+}
+
+async function createDefaultUserRecords(userId) {
+    await db.query('INSERT INTO user_settings (user_id) VALUES (?)', [userId]);
+    await db.query('INSERT INTO user_statistics (user_id) VALUES (?)', [userId]);
+}
+
+async function registerUser(payload) {
+    const { email, passwordHash, fullName, targetGoal, avatarBase64, avatarMimeType } = payload;
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedFullName = String(fullName || '').trim();
+
+    if (!normalizedEmail || !passwordHash || !normalizedFullName) {
+        throw createHttpError(400, 'Vui lòng nhập đầy đủ các trường thông tin bắt buộc!');
+    }
+
+    const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
+    if (existingUsers.length > 0) {
+        throw createHttpError(400, 'Email này đã tồn tại trong hệ thống!');
+    }
+
+    const encryptedPassword = await bcrypt.hash(passwordHash, 10);
+    const avatarUrl = saveAvatarFromBase64(avatarBase64, avatarMimeType);
+
+    const [userResult] = await db.query(
+        'INSERT INTO users (email, password_hash, full_name, target_goal, avatar_url) VALUES (?, ?, ?, ?, ?)',
+        [normalizedEmail, encryptedPassword, normalizedFullName, targetGoal || 'TOEIC 700', avatarUrl]
+    );
+    const userId = userResult.insertId;
+
+    await createDefaultUserRecords(userId);
+
+    return { message: 'Đăng ký tài khoản MinLish thành công!' };
+}
+
+async function loginUser(payload) {
+    const { email, password } = payload;
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail || !password) {
+        throw createHttpError(400, 'Vui lòng cung cấp đầy đủ email và mật khẩu!');
+    }
+
+    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
+    if (users.length === 0) {
+        throw createHttpError(400, 'Tài khoản hoặc mật khẩu không chính xác!');
+    }
+
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+        throw createHttpError(400, 'Tài khoản hoặc mật khẩu không chính xác!');
+    }
+
+    return createAuthResponse(user);
+}
+
+async function verifyGoogleIdToken(idToken) {
+    if (!idToken) {
+        throw createHttpError(400, 'Vui lòng gửi Google ID token.');
+    }
+    if (!env.googleClientId) {
+        throw createHttpError(500, 'Backend chưa cấu hình GOOGLE_CLIENT_ID.');
+    }
+
+    let ticket;
+    try {
+        ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: env.googleClientId
+        });
+    } catch (error) {
+        throw createHttpError(401, 'Google ID token không hợp lệ.');
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+        throw createHttpError(401, 'Không lấy được email từ tài khoản Google.');
+    }
+    if (payload.email_verified !== true && payload.email_verified !== 'true') {
+        throw createHttpError(401, 'Email Google chưa được xác thực.');
+    }
+
+    const email = normalizeEmail(payload.email);
+    return {
+        email,
+        fullName: String(payload.name || email.split('@')[0]).trim(),
+        picture: payload.picture || null
+    };
+}
+
+async function loginWithGoogle(payload = {}) {
+    const googleUser = await verifyGoogleIdToken(payload.idToken);
+    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [googleUser.email]);
+    let user = users[0];
+
+    if (!user) {
+        const randomPassword = crypto.randomBytes(32).toString('hex');
+        const encryptedPassword = await bcrypt.hash(randomPassword, 10);
+        const [userResult] = await db.query(
+            'INSERT INTO users (email, password_hash, full_name, target_goal, avatar_url) VALUES (?, ?, ?, ?, ?)',
+            [googleUser.email, encryptedPassword, googleUser.fullName, 'TOEIC 700', googleUser.picture]
+        );
+
+        user = {
+            id: userResult.insertId,
+            email: googleUser.email,
+            full_name: googleUser.fullName,
+            avatar_url: googleUser.picture
+        };
+        await createDefaultUserRecords(user.id);
+    } else if (!user.avatar_url && googleUser.picture) {
+        await db.query('UPDATE users SET avatar_url = ? WHERE id = ?', [googleUser.picture, user.id]);
+        user.avatar_url = googleUser.picture;
+    }
+
+    return createAuthResponse(user);
 }
 
 async function requestPasswordReset(payload) {
@@ -113,6 +194,7 @@ async function resetPassword(payload) {
 module.exports = {
     registerUser,
     loginUser,
+    loginWithGoogle,
     requestPasswordReset,
     resetPassword
 };

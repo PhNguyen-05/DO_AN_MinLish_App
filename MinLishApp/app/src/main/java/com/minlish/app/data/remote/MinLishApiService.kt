@@ -4,6 +4,7 @@ import com.minlish.app.BuildConfig
 import com.minlish.app.data.model.ApiMessageResponse
 import com.minlish.app.data.model.AuthResponse
 import com.minlish.app.data.model.DashboardResponse
+import com.minlish.app.data.model.GoogleAuthRequest
 import com.minlish.app.data.model.LearningDeckListResponse
 import com.minlish.app.data.model.LearningPlanResponse
 import com.minlish.app.data.model.LearningSessionResponse
@@ -32,6 +33,9 @@ interface MinLishApiService {
 
     @POST("api/auth/login")
     suspend fun login(@Body body: Map<String, String>): AuthResponse
+
+    @POST("api/auth/google")
+    suspend fun loginWithGoogle(@Body request: GoogleAuthRequest): AuthResponse
 
     @GET("api/dashboard")
     suspend fun getDashboard(@Header("Authorization") token: String): DashboardResponse

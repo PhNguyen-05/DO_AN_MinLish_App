@@ -11,6 +11,11 @@ const login = asyncHandler(async (req, res) => {
     res.json(result);
 });
 
+const googleLogin = asyncHandler(async (req, res) => {
+    const result = await authService.loginWithGoogle(req.body);
+    res.json(result);
+});
+
 const forgotPassword = asyncHandler(async (req, res) => {
     const result = await authService.requestPasswordReset(req.body);
     res.json(result);
@@ -24,6 +29,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 module.exports = {
     register,
     login,
+    googleLogin,
     forgotPassword,
     resetPassword
 };

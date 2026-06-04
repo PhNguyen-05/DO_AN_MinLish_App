@@ -10,6 +10,10 @@ data class RegisterRequest(
     val avatarMimeType: String? = null
 )
 
+data class GoogleAuthRequest(
+    val idToken: String
+)
+
 data class AuthResponse(
     val token: String,
     val user: UserInfo
