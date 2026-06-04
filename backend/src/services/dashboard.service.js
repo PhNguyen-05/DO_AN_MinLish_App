@@ -58,11 +58,14 @@ async function getProgressByUserId(userId) {
     }
 
     const [[retention]] = await db.query(`
-        SELECT AVG(CASE WHEN quality >= 2 THEN 1 ELSE 0 END) AS rate
-        FROM learning_logs
-        WHERE user_id = ?
-          AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-    `, [userId]);
+        SELECT AVG(CASE WHEN ll.quality >= 2 THEN 1 ELSE 0 END) AS rate
+        FROM learning_logs ll
+        JOIN cards c ON ll.card_id = c.id
+        JOIN decks d ON c.deck_id = d.id
+        WHERE ll.user_id = ?
+          AND ll.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+          AND (d.user_id IS NULL OR d.user_id = ?)
+    `, [userId, userId]);
 
     const [[stats]] = await db.query(`
         SELECT COALESCE(total_words_learned, 0) AS total_words_learned,

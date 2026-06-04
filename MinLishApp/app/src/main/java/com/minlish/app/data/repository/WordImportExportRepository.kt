@@ -31,8 +31,11 @@ class WordImportExportRepository(context: Context) {
 
     /** Bộ cũ chỉ lưu catalog, chưa có deck Room → tạo deck học tương ứng. */
     suspend fun syncLegacySetsToLearning() {
-        catalog.getWordSets()
-            .filter { it.deckId == null && it.words.isNotEmpty() }
-            .forEach { importWordSet(it) }
+        for (wordSet in catalog.getWordSets().filter { it.words.isNotEmpty() }) {
+            val deckId = wordSet.deckId
+            if (deckId == null || !learning.hasImportedWordSet(deckId)) {
+                importWordSet(wordSet)
+            }
+        }
     }
 }

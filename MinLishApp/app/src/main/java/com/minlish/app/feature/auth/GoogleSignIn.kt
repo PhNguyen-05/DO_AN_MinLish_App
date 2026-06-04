@@ -12,6 +12,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -60,6 +61,9 @@ internal fun rememberGoogleSignInHandler(
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Invalid Google ID token response", e)
                         onError("Mã xác thực Google không hợp lệ. Vui lòng thử lại.")
+                    } catch (e: NoCredentialException) {
+                        Log.e(TAG, "No Google account is available", e)
+                        onError("Không tìm thấy tài khoản Google khả dụng.")
                     } catch (e: GetCredentialException) {
                         Log.e(TAG, "Google credential request failed", e)
                         onError("Không thể mở đăng nhập Google. Vui lòng thử lại.")

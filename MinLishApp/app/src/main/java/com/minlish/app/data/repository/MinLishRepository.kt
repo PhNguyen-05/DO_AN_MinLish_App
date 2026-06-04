@@ -94,10 +94,15 @@ class MinLishRepository private constructor(context: Context) {
         adjustLearningPlan(deltaNewWords = -cards.count { it.repetitions == 0 })
     }
 
+    suspend fun hasImportedWordSet(deckId: Long): Boolean {
+        if (deckId >= 0) return false
+        return dao.getDecks().any { it.id == deckId } && dao.getCardsForDeck(deckId).isNotEmpty()
+    }
+
     // Synchronize offline review queue
-    suspend fun syncPendingReviews(token: String) {
+    suspend fun syncPendingReviews(token: String): Boolean {
         val pending = dao.getPendingReviews()
-        if (pending.isEmpty()) return
+        if (pending.isEmpty()) return true
 
         for (review in pending) {
             try {
@@ -109,20 +114,23 @@ class MinLishRepository private constructor(context: Context) {
                     dao.deletePendingReview(review.id)
                 } else {
                     // Server error (5xx), stop and retry next time
-                    break
+                    return false
                 }
             } catch (e: Exception) {
                 // Connection or other errors, stop and retry next time
-                break
+                return false
             }
         }
+        return true
     }
 
     // 1. Dashboard Cache & Sync
     suspend fun getDashboard(token: String, forceRefresh: Boolean = false): DashboardResponse {
         if (!forceRefresh) {
             try {
-                syncPendingReviews(token)
+                if (!syncPendingReviews(token)) {
+                    throw IOException("Pending review sync is unavailable.")
+                }
                 val response = api.getDashboard(token)
                 dao.insertDashboard(
                     DashboardCache(
@@ -298,7 +306,9 @@ class MinLishRepository private constructor(context: Context) {
         }
 
         try {
-            syncPendingReviews(token)
+            if (!syncPendingReviews(token)) {
+                throw IOException("Pending review sync is unavailable.")
+            }
             val response = api.getLearningSession(token, mode, limit, deckId)
 
             // Cache cards locally
@@ -540,6 +550,9 @@ class MinLishRepository private constructor(context: Context) {
 
         // Now attempt network sync
         try {
+            if (!syncPendingReviews(token)) {
+                throw IOException("Pending review sync is unavailable.")
+            }
             val response = api.reviewCard(token, request)
             // Save updated card progress to local Room DB with progress returned by server
             dao.insertCards(
@@ -552,8 +565,6 @@ class MinLishRepository private constructor(context: Context) {
                     )
                 )
             )
-            // Clear any pending sync for this card if it exists
-            dao.deletePendingReviewByCardId(request.cardId)
             return response
         } catch (e: Exception) {
             // Save local offline calculation progress on network failure
@@ -566,7 +577,6 @@ class MinLishRepository private constructor(context: Context) {
             dao.insertCards(listOf(updatedCard))
 
             // Save review event in sync queue
-            dao.deletePendingReviewByCardId(request.cardId)
             dao.insertPendingReview(
                 PendingReviewEntity(
                     cardId = request.cardId,
@@ -846,8 +856,14 @@ class MinLishRepository private constructor(context: Context) {
             val localSettings = UserSettingsCache(
                 theme = request.theme ?: current?.theme ?: "system",
                 dailyReminderTime = request.dailyReminderTime ?: current?.dailyReminderTime ?: "20:00:00",
-                notificationsEnabled = if (request.notificationsEnabled == true) 1 else 0,
-                emailNotificationsEnabled = if (request.emailNotificationsEnabled == true) 1 else 0,
+                notificationsEnabled = request.notificationsEnabled
+                    ?.let { if (it) 1 else 0 }
+                    ?: current?.notificationsEnabled
+                    ?: 1,
+                emailNotificationsEnabled = request.emailNotificationsEnabled
+                    ?.let { if (it) 1 else 0 }
+                    ?: current?.emailNotificationsEnabled
+                    ?: 1,
                 dailyNewWordsGoal = request.dailyNewWordsGoal ?: current?.dailyNewWordsGoal ?: 20,
                 dailyReviewGoal = request.dailyReviewGoal ?: current?.dailyReviewGoal ?: 50
             )

@@ -117,6 +117,12 @@ async function updateSettings(userId, payload) {
         throw createHttpError(400, 'Không có cài đặt nào cần cập nhật.');
     }
 
+    await db.query(`
+        INSERT INTO user_settings (user_id)
+        VALUES (?)
+        ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)
+    `, [userId]);
+
     values.push(userId);
     await db.query(`UPDATE user_settings SET ${fields.join(', ')} WHERE user_id = ?`, values);
 

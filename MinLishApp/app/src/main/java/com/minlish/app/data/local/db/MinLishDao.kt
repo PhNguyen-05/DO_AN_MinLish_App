@@ -75,7 +75,7 @@ interface MinLishDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPendingReview(review: PendingReviewEntity)
 
-    @Query("SELECT * FROM pending_reviews ORDER BY timestamp ASC")
+    @Query("SELECT * FROM pending_reviews ORDER BY timestamp ASC, id ASC")
     suspend fun getPendingReviews(): List<PendingReviewEntity>
 
     @Query("DELETE FROM pending_reviews WHERE id = :id")

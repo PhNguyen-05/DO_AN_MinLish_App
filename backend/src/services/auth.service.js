@@ -10,9 +10,24 @@ const otpService = require('./otp.service');
 const mailService = require('./mail.service');
 
 const googleClient = new OAuth2Client();
+const SPECIAL_PASSWORD_CHARACTERS = '!@#$%^&*()_+=[]{}|;:,.<>?/-';
 
 function normalizeEmail(email) {
     return String(email || '').trim().toLowerCase();
+}
+
+function validatePassword(password) {
+    const value = String(password || '');
+    if (value.length < 8 ||
+        !/[A-Z]/.test(value) ||
+        !/[a-z]/.test(value) ||
+        !/[0-9]/.test(value) ||
+        ![...value].some(char => SPECIAL_PASSWORD_CHARACTERS.includes(char))) {
+        throw createHttpError(
+            400,
+            'Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt.'
+        );
+    }
 }
 
 function createAuthResponse(user) {
@@ -42,6 +57,8 @@ async function registerUser(payload) {
     if (!normalizedEmail || !passwordHash || !normalizedFullName) {
         throw createHttpError(400, 'Vui lòng nhập đầy đủ các trường thông tin bắt buộc!');
     }
+
+    validatePassword(passwordHash);
 
     const [existingUsers] = await db.query('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
     if (existingUsers.length > 0) {
@@ -148,31 +165,35 @@ async function loginWithGoogle(payload = {}) {
 
 async function requestPasswordReset(payload) {
     const { email } = payload;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email) {
+    if (!normalizedEmail) {
         throw createHttpError(400, 'Vui lòng cung cấp email.');
     }
 
-    const [users] = await db.query('SELECT id, email FROM users WHERE email = ?', [email]);
+    const [users] = await db.query('SELECT id, email FROM users WHERE email = ?', [normalizedEmail]);
     if (users.length === 0) {
         throw createHttpError(400, 'Không tìm thấy tài khoản với email này.');
     }
 
     const otp = otpService.generateOtp();
-    await mailService.sendPasswordResetOtp(email, otp);
-    otpService.saveOtp(email, otp);
+    await mailService.sendPasswordResetOtp(normalizedEmail, otp);
+    otpService.saveOtp(normalizedEmail, otp);
 
     return { message: 'Mã OTP đã được gửi tới email của bạn. Vui lòng kiểm tra hộp thư.' };
 }
 
 async function resetPassword(payload) {
     const { email, otp, newPassword } = payload;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !otp || !newPassword) {
+    if (!normalizedEmail || !otp || !newPassword) {
         throw createHttpError(400, 'Vui lòng cung cấp email, mã OTP và mật khẩu mới.');
     }
 
-    const record = otpService.getOtp(email);
+    validatePassword(newPassword);
+
+    const record = otpService.getOtp(normalizedEmail);
     if (!record) {
         throw createHttpError(400, 'Không có mã OTP nào được yêu cầu cho email này.');
     }
@@ -180,13 +201,13 @@ async function resetPassword(payload) {
         throw createHttpError(400, 'Mã OTP không hợp lệ.');
     }
     if (record.expiresAt < Date.now()) {
-        otpService.deleteOtp(email);
+        otpService.deleteOtp(normalizedEmail);
         throw createHttpError(400, 'Mã OTP đã hết hạn.');
     }
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    await db.query('UPDATE users SET password_hash = ? WHERE email = ?', [hashed, email]);
-    otpService.deleteOtp(email);
+    await db.query('UPDATE users SET password_hash = ? WHERE email = ?', [hashed, normalizedEmail]);
+    otpService.deleteOtp(normalizedEmail);
 
     return { message: 'Mật khẩu đã được đặt lại thành công.' };
 }

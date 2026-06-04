@@ -11,8 +11,10 @@ import com.minlish.app.data.local.UserSession
 import com.minlish.app.data.model.AuthResponse
 import com.minlish.app.data.model.GoogleAuthRequest
 import com.minlish.app.data.model.RegisterRequest
+import com.minlish.app.data.repository.WordImportExportRepository
 import com.minlish.app.data.remote.RetrofitClient
 import java.io.IOException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import org.json.JSONObject
@@ -22,6 +24,7 @@ import com.minlish.app.data.local.db.MinLishDatabase
 import kotlinx.coroutines.Dispatchers
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
+    private var logoutCleanupJob: Job? = null
 
     var loginError by mutableStateOf("")
         private set
@@ -312,16 +315,20 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         forgotMessage = ""
         forgotError = ""
 
-        viewModelScope.launch(Dispatchers.IO) {
+        logoutCleanupJob = viewModelScope.launch(Dispatchers.IO) {
             try {
                 MinLishDatabase.getInstance(app).clearAllTables()
+                WordImportExportRepository(app).syncLegacySetsToLearning()
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "Failed to clear Room database on logout", e)
             }
         }
     }
 
-    private fun saveAuthSession(response: AuthResponse) {
+    private suspend fun saveAuthSession(response: AuthResponse) {
+        logoutCleanupJob?.join()
+        logoutCleanupJob = null
+
         val token = "Bearer ${response.token}"
         UserSession.token = token
 

@@ -72,9 +72,12 @@ async function getDailyPlan(userId) {
 
     const [[dueReview]] = await db.query(`
         SELECT COUNT(*) AS count
-        FROM card_progress
-        WHERE user_id = ? AND next_review_at <= NOW()
-    `, [userId]);
+        FROM card_progress cp
+        JOIN cards c ON cp.card_id = c.id
+        JOIN decks d ON c.deck_id = d.id
+        WHERE cp.user_id = ? AND cp.next_review_at <= NOW()
+          AND (d.user_id IS NULL OR d.user_id = ?)
+    `, [userId, userId]);
 
     const [[newWords]] = await db.query(`
         SELECT COUNT(*) AS count
@@ -178,7 +181,7 @@ async function getLearningSession(userId, options = {}) {
 }
 
 async function getDueReviewCards(userId, limit, deckId) {
-    const params = [userId];
+    const params = [userId, userId];
     let deckFilter = '';
     if (deckId) {
         deckFilter = 'AND c.deck_id = ?';
@@ -195,6 +198,7 @@ async function getDueReviewCards(userId, limit, deckId) {
         JOIN cards c ON cp.card_id = c.id
         JOIN decks d ON c.deck_id = d.id
         WHERE cp.user_id = ? AND cp.next_review_at <= NOW()
+          AND (d.user_id IS NULL OR d.user_id = ?)
           ${deckFilter}
         ORDER BY cp.next_review_at ASC, c.id ASC
         LIMIT ?
@@ -266,7 +270,12 @@ async function reviewCard(userId, payload) {
         throw createHttpError(400, 'Thiếu cardId.');
     }
 
-    const [[card]] = await db.query('SELECT id FROM cards WHERE id = ?', [cardId]);
+    const [[card]] = await db.query(`
+        SELECT c.id
+        FROM cards c
+        JOIN decks d ON c.deck_id = d.id
+        WHERE c.id = ? AND (d.user_id IS NULL OR d.user_id = ?)
+    `, [cardId, userId]);
     if (!card) {
         throw createHttpError(404, 'Không tìm thấy flashcard.');
     }
@@ -341,15 +350,21 @@ async function reviewCard(userId, payload) {
 async function refreshUserStatistics(userId) {
     const [[learned]] = await db.query(`
         SELECT COUNT(*) AS count
-        FROM card_progress
-        WHERE user_id = ? AND repetitions > 0
-    `, [userId]);
+        FROM card_progress cp
+        JOIN cards c ON cp.card_id = c.id
+        JOIN decks d ON c.deck_id = d.id
+        WHERE cp.user_id = ? AND cp.repetitions > 0
+          AND (d.user_id IS NULL OR d.user_id = ?)
+    `, [userId, userId]);
 
     const [[accuracy]] = await db.query(`
-        SELECT AVG(CASE WHEN quality >= 2 THEN 1 ELSE 0 END) AS rate
-        FROM learning_logs
-        WHERE user_id = ?
-    `, [userId]);
+        SELECT AVG(CASE WHEN ll.quality >= 2 THEN 1 ELSE 0 END) AS rate
+        FROM learning_logs ll
+        JOIN cards c ON ll.card_id = c.id
+        JOIN decks d ON c.deck_id = d.id
+        WHERE ll.user_id = ?
+          AND (d.user_id IS NULL OR d.user_id = ?)
+    `, [userId, userId]);
 
     const currentStreak = await calculateCurrentStreak(userId);
 
