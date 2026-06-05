@@ -2,12 +2,34 @@ const transporter = require('../config/mail');
 const env = require('../config/env');
 const { createHttpError } = require('../utils/httpError');
 
+const SEND_TIMEOUT_MS = 25000;
+
+function sendWithTimeout(mailOptions) {
+    return Promise.race([
+        transporter.sendMail(mailOptions),
+        new Promise((_, reject) => {
+            setTimeout(() => reject(createHttpError(504, 'SMTP gui email qua thoi gian cho.')), SEND_TIMEOUT_MS);
+        })
+    ]);
+}
+
+async function sendMail(mailOptions) {
+    try {
+        await sendWithTimeout(mailOptions);
+    } catch (error) {
+        if (error.statusCode) {
+            throw error;
+        }
+        throw createHttpError(502, `Khong gui duoc email qua SMTP: ${error.message}`);
+    }
+}
+
 async function sendPasswordResetOtp(email, otp) {
     if (!transporter) {
         throw createHttpError(500, 'SMTP chưa được cấu hình trên server. Vui lòng thiết lập SMTP_USER và SMTP_PASS.');
     }
 
-    await transporter.sendMail({
+    await sendMail({
         from: `"MinLish" <${env.smtp.from}>`,
         to: email,
         subject: 'MinLish - Mã OTP đặt lại mật khẩu',
@@ -28,7 +50,7 @@ async function sendStudyReminderEmail(email, payload) {
     const reviewedToday = Number(payload.words_reviewed_today || 0);
     const reviewGoal = Number(payload.daily_review_goal || 0);
 
-    await transporter.sendMail({
+    await sendMail({
         from: `"MinLish" <${env.smtp.from}>`,
         to: email,
         subject: 'MinLish - Nhắc học từ vựng hôm nay',

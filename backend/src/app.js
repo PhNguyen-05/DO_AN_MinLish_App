@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const db = require('./config/db');
 const env = require('./config/env');
+const mailTransporter = require('./config/mail');
 const { uploadRoot } = require('./utils/avatarStorage');
 const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
@@ -25,6 +26,20 @@ app.get('/health/db', async (req, res, next) => {
         await db.query('SELECT 1 AS ok');
         res.json({ status: 'ok', database: 'ok' });
     } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/health/smtp', async (req, res, next) => {
+    if (!mailTransporter) {
+        return res.status(500).json({ status: 'error', smtp: 'not_configured' });
+    }
+
+    try {
+        await mailTransporter.verify();
+        res.json({ status: 'ok', smtp: 'ok' });
+    } catch (error) {
+        error.statusCode = 502;
         next(error);
     }
 });

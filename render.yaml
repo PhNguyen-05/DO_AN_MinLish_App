@@ -25,7 +25,7 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: ENABLE_EMAIL_REMINDERS
-        value: "false"
+        value: "true"
       - key: REMINDER_TIME_ZONE
         value: Asia/Bangkok
       - key: ENABLE_KEEP_ALIVE
