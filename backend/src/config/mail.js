@@ -1,7 +1,12 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
 const env = require('./env');
 
 let transporter = null;
+
+if (typeof dns.setDefaultResultOrder === 'function') {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 if (env.smtp.user && env.smtp.pass) {
     transporter = nodemailer.createTransport({
