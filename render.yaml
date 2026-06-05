@@ -19,7 +19,7 @@ services:
       - key: DB_PASSWORD
         sync: false
       - key: DB_NAME
-        value: railway
+        value: minlish_db
       - key: GOOGLE_CLIENT_ID
         value: 1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com
       - key: JWT_SECRET

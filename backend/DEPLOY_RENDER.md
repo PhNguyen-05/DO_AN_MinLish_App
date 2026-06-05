@@ -26,12 +26,12 @@ DB_HOST=acela.proxy.rlwy.net
 DB_PORT=58234
 DB_USER=root
 DB_PASSWORD=<Railway database password>
-DB_NAME=railway
+DB_NAME=minlish_db
 ```
 
 Do not commit the real `DB_PASSWORD` to GitHub. Add it only in Render Environment Variables.
 
-If your Railway database name is different from `railway`, update `DB_NAME` in Render.
+If your Railway database name is different from `minlish_db`, update `DB_NAME` in Render.
 
 ## Other Render Environment Variables
 
