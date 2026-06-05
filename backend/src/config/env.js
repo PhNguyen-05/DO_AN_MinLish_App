@@ -8,6 +8,10 @@ dotenv.config({ path: path.join(rootDir, '.env'), quiet: true });
 
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
+const mailProvider = String(
+    process.env.MAIL_PROVIDER ||
+    (process.env.NODE_ENV === 'production' || process.env.BREVO_API_KEY ? 'brevo' : 'smtp')
+).toLowerCase();
 const defaultGoogleClientId = '1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com';
 const defaultKeepAliveUrl = 'https://do-an-minlish-app.onrender.com/health/db';
 
@@ -41,6 +45,11 @@ module.exports = {
         secure: process.env.SMTP_SECURE === 'true',
         from: process.env.SMTP_FROM || smtpUser,
         family: numberEnv('SMTP_FAMILY', 4)
+    },
+    mailProvider,
+    brevo: {
+        apiKey: process.env.BREVO_API_KEY,
+        baseUrl: process.env.BREVO_API_BASE_URL || 'https://api.brevo.com/v3'
     },
     notifications: {
         enableEmailReminders: process.env.ENABLE_EMAIL_REMINDERS === 'true',

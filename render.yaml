@@ -28,6 +28,10 @@ services:
         value: "true"
       - key: REMINDER_TIME_ZONE
         value: Asia/Bangkok
+      - key: MAIL_PROVIDER
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
       - key: ENABLE_KEEP_ALIVE
         value: "true"
       - key: KEEP_ALIVE_URL

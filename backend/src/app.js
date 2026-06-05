@@ -4,6 +4,7 @@ const path = require('path');
 const db = require('./config/db');
 const env = require('./config/env');
 const mailTransporter = require('./config/mail');
+const mailService = require('./services/mail.service');
 const { uploadRoot } = require('./utils/avatarStorage');
 const authRoutes = require('./routes/auth.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
@@ -50,6 +51,26 @@ app.get('/health/smtp', async (req, res, next) => {
         res.json({ status: 'ok', smtp: 'ok', config: smtpConfig });
     } catch (error) {
         res.status(502).json({ status: 'error', smtp: 'unreachable', message: error.message, config: smtpConfig });
+    }
+});
+
+app.get('/health/email', async (req, res) => {
+    const config = {
+        provider: env.mailProvider,
+        fromConfigured: Boolean(env.smtp.from),
+        brevoConfigured: Boolean(env.brevo.apiKey),
+        smtpConfigured: Boolean(env.smtp.user && env.smtp.pass)
+    };
+
+    try {
+        const result = await mailService.verifyEmailProvider();
+        res.json({ status: 'ok', email: result, config });
+    } catch (error) {
+        res.status(error.statusCode || 502).json({
+            status: 'error',
+            message: error.message,
+            config
+        });
     }
 });
 

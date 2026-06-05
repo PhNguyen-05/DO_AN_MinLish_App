@@ -39,16 +39,25 @@ If your Railway database name is different from `minlish_db`, update `DB_NAME` i
 NODE_ENV=production
 GOOGLE_CLIENT_ID=1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com
 JWT_SECRET=<generate a long random string>
-ENABLE_EMAIL_REMINDERS=false
+ENABLE_EMAIL_REMINDERS=true
 REMINDER_TIME_ZONE=Asia/Bangkok
 ENABLE_KEEP_ALIVE=true
 KEEP_ALIVE_URL=https://do-an-minlish-app.onrender.com/health/db
 KEEP_ALIVE_INTERVAL_MINUTES=10
 ```
 
-SMTP is optional. Configure it only if forgot-password email or email reminders must work:
+Render Free blocks outbound SMTP ports, so production email should use Brevo HTTP API:
 
 ```env
+MAIL_PROVIDER=brevo
+BREVO_API_KEY=<your Brevo API key>
+SMTP_FROM=<verified Brevo sender email>
+```
+
+For local development or non-Render hosts that allow SMTP, Gmail SMTP can still be used:
+
+```env
+MAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true

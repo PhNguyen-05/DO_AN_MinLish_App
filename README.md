@@ -113,6 +113,8 @@ SMTP_FAMILY=4
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM=your-email@gmail.com
+MAIL_PROVIDER=brevo
+BREVO_API_KEY=your-brevo-api-key
 ENABLE_EMAIL_REMINDERS=true
 REMINDER_TIME_ZONE=Asia/Bangkok
 ```
