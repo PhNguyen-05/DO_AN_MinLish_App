@@ -5,6 +5,7 @@ import com.minlish.app.data.model.ApiMessageResponse
 import com.minlish.app.data.model.AuthResponse
 import com.minlish.app.data.model.DashboardResponse
 import com.minlish.app.data.model.GoogleAuthRequest
+import com.minlish.app.data.model.HealthResponse
 import com.minlish.app.data.model.LearningDeckListResponse
 import com.minlish.app.data.model.LearningPlanResponse
 import com.minlish.app.data.model.LearningSessionResponse
@@ -28,6 +29,9 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface MinLishApiService {
+    @GET("health/db")
+    suspend fun keepAlive(): Response<HealthResponse>
+
     @POST("api/auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<Unit>
 

@@ -9,6 +9,7 @@ dotenv.config({ path: path.join(rootDir, '.env'), quiet: true });
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 const defaultGoogleClientId = '1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com';
+const defaultKeepAliveUrl = 'https://do-an-minlish-app.onrender.com/health/db';
 
 function numberEnv(name, fallback) {
     const value = process.env[name];
@@ -43,5 +44,12 @@ module.exports = {
     notifications: {
         enableEmailReminders: process.env.ENABLE_EMAIL_REMINDERS === 'true',
         timeZone: process.env.REMINDER_TIME_ZONE || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+    },
+    keepAlive: {
+        enabled: process.env.ENABLE_KEEP_ALIVE
+            ? process.env.ENABLE_KEEP_ALIVE === 'true'
+            : process.env.NODE_ENV === 'production',
+        url: process.env.KEEP_ALIVE_URL || defaultKeepAliveUrl,
+        intervalMinutes: numberEnv('KEEP_ALIVE_INTERVAL_MINUTES', 10)
     }
 };

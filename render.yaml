@@ -28,6 +28,12 @@ services:
         value: "false"
       - key: REMINDER_TIME_ZONE
         value: Asia/Bangkok
+      - key: ENABLE_KEEP_ALIVE
+        value: "true"
+      - key: KEEP_ALIVE_URL
+        value: https://do-an-minlish-app.onrender.com/health/db
+      - key: KEEP_ALIVE_INTERVAL_MINUTES
+        value: "10"
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

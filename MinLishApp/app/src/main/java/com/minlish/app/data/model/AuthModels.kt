@@ -24,6 +24,11 @@ data class ApiMessageResponse(
     val error: String? = null
 )
 
+data class HealthResponse(
+    val status: String? = null,
+    val database: String? = null
+)
+
 data class UserInfo(
     val id: Long,
     val full_name: String,

@@ -1,6 +1,7 @@
 const cors = require('cors');
 const express = require('express');
 const path = require('path');
+const db = require('./config/db');
 const env = require('./config/env');
 const { uploadRoot } = require('./utils/avatarStorage');
 const authRoutes = require('./routes/auth.routes');
@@ -17,6 +18,15 @@ app.use(cors());
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
+});
+
+app.get('/health/db', async (req, res, next) => {
+    try {
+        await db.query('SELECT 1 AS ok');
+        res.json({ status: 'ok', database: 'ok' });
+    } catch (error) {
+        next(error);
+    }
 });
 
 app.use('/uploads', express.static(uploadRoot));

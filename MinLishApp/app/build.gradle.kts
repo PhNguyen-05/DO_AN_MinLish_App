@@ -45,7 +45,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:3000/\"")
+        buildConfigField("String", "BASE_URL", "\"https://do-an-minlish-app.onrender.com/\"")
         buildConfigField("String", "GOOGLE_CLIENT_ID", buildConfigString(googleClientId))
     }
 
@@ -61,7 +61,7 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("debug")
-            buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:3000/\"")
+            buildConfigField("String", "BASE_URL", "\"https://do-an-minlish-app.onrender.com/\"")
         }
         release {
             isMinifyEnabled = false
@@ -69,7 +69,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://api.minlish.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://do-an-minlish-app.onrender.com/\"")
         }
     }
     compileOptions {

@@ -3,6 +3,7 @@ package com.minlish.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -10,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.minlish.app.data.remote.ServerKeepAlive
 import com.minlish.app.feature.auth.AuthViewModel
 import com.minlish.app.feature.auth.ForgotPasswordScreen
 import com.minlish.app.feature.auth.LoginScreen
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         NotificationScheduler.restoreDailyReminder(this)
+        ServerKeepAlive.start(lifecycleScope)
         setContent {
             MinLishAppTheme {
                 MinLishAppNavigation()

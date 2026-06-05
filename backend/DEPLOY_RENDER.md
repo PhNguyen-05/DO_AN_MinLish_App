@@ -41,6 +41,9 @@ GOOGLE_CLIENT_ID=1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleuserc
 JWT_SECRET=<generate a long random string>
 ENABLE_EMAIL_REMINDERS=false
 REMINDER_TIME_ZONE=Asia/Bangkok
+ENABLE_KEEP_ALIVE=true
+KEEP_ALIVE_URL=https://do-an-minlish-app.onrender.com/health/db
+KEEP_ALIVE_INTERVAL_MINUTES=10
 ```
 
 SMTP is optional. Configure it only if forgot-password email or email reminders must work:
@@ -66,6 +69,18 @@ Expected response:
 
 ```json
 {"status":"ok"}
+```
+
+To verify database connectivity, open:
+
+```text
+https://<your-render-service>.onrender.com/health/db
+```
+
+Expected response:
+
+```json
+{"status":"ok","database":"ok"}
 ```
 
 ## Android API URL
