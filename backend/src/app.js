@@ -10,6 +10,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 const learningRoutes = require('./routes/learning.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const userRoutes = require('./routes/user.routes');
+const { getDailyEmailReminderJobState } = require('./jobs/notification.job');
 const { errorHandler, notFoundHandler } = require('./middlewares/error.middleware');
 
 const app = express();
@@ -50,6 +51,13 @@ app.get('/health/smtp', async (req, res, next) => {
     } catch (error) {
         res.status(502).json({ status: 'error', smtp: 'unreachable', message: error.message, config: smtpConfig });
     }
+});
+
+app.get('/health/notifications', (req, res) => {
+    res.json({
+        status: 'ok',
+        emailReminderJob: getDailyEmailReminderJobState()
+    });
 });
 
 app.use('/uploads', express.static(uploadRoot));
