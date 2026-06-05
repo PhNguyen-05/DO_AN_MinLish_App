@@ -109,6 +109,7 @@ GOOGLE_CLIENT_ID=1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleuserc
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
+SMTP_FAMILY=4
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM=your-email@gmail.com

@@ -35,6 +35,7 @@ app.get('/health/smtp', async (req, res, next) => {
         host: env.smtp.host,
         port: env.smtp.port,
         secure: env.smtp.secure,
+        family: env.smtp.family,
         userConfigured: Boolean(env.smtp.user),
         fromConfigured: Boolean(env.smtp.from)
     };

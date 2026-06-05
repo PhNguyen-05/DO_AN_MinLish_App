@@ -52,6 +52,7 @@ SMTP is optional. Configure it only if forgot-password email or email reminders 
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
+SMTP_FAMILY=4
 SMTP_USER=<your email>
 SMTP_PASS=<your app password>
 SMTP_FROM=<your email>

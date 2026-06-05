@@ -39,7 +39,8 @@ module.exports = {
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
         secure: process.env.SMTP_SECURE === 'true',
-        from: process.env.SMTP_FROM || smtpUser
+        from: process.env.SMTP_FROM || smtpUser,
+        family: numberEnv('SMTP_FAMILY', 4)
     },
     notifications: {
         enableEmailReminders: process.env.ENABLE_EMAIL_REMINDERS === 'true',
