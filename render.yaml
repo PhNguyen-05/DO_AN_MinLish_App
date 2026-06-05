@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: minlish-backend
+    runtime: docker
+    branch: deploy
+    rootDir: backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        value: acela.proxy.rlwy.net
+      - key: DB_PORT
+        value: "58234"
+      - key: DB_USER
+        value: root
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: railway
+      - key: GOOGLE_CLIENT_ID
+        value: 1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com
+      - key: JWT_SECRET
+        sync: false
+      - key: ENABLE_EMAIL_REMINDERS
+        value: "false"
+      - key: REMINDER_TIME_ZONE
+        value: Asia/Bangkok
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false

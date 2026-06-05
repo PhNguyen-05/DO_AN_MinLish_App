@@ -10,16 +10,27 @@ const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 const defaultGoogleClientId = '1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com';
 
+function numberEnv(name, fallback) {
+    const value = process.env[name];
+    if (!value) {
+        return fallback;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+    return Number.isNaN(parsed) ? fallback : parsed;
+}
+
 module.exports = {
     rootDir,
     port: process.env.PORT || 3000,
     jwtSecret: process.env.JWT_SECRET || 'minlish_super_secret_key_2026',
     googleClientId: process.env.GOOGLE_CLIENT_ID || defaultGoogleClientId,
     db: {
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '123456',
-        database: process.env.DB_NAME || 'minlish_db'
+        host: process.env.DB_HOST || process.env.MYSQLHOST || 'localhost',
+        port: numberEnv('DB_PORT', numberEnv('MYSQLPORT', 3306)),
+        user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
+        password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '123456',
+        database: process.env.DB_NAME || process.env.MYSQLDATABASE || 'minlish_db'
     },
     smtp: {
         user: smtpUser,

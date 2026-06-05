@@ -15,6 +15,10 @@ const app = express();
 app.use(express.json({ limit: '2mb' }));
 app.use(cors());
 
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
 app.use('/uploads', express.static(uploadRoot));
 app.use('/static', express.static(path.join(env.rootDir, 'public')));
 
