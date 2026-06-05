@@ -31,16 +31,23 @@ app.get('/health/db', async (req, res, next) => {
 });
 
 app.get('/health/smtp', async (req, res, next) => {
+    const smtpConfig = {
+        host: env.smtp.host,
+        port: env.smtp.port,
+        secure: env.smtp.secure,
+        userConfigured: Boolean(env.smtp.user),
+        fromConfigured: Boolean(env.smtp.from)
+    };
+
     if (!mailTransporter) {
-        return res.status(500).json({ status: 'error', smtp: 'not_configured' });
+        return res.status(500).json({ status: 'error', smtp: 'not_configured', config: smtpConfig });
     }
 
     try {
         await mailTransporter.verify();
-        res.json({ status: 'ok', smtp: 'ok' });
+        res.json({ status: 'ok', smtp: 'ok', config: smtpConfig });
     } catch (error) {
-        error.statusCode = 502;
-        next(error);
+        res.status(502).json({ status: 'error', smtp: 'unreachable', message: error.message, config: smtpConfig });
     }
 });
 
