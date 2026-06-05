@@ -8,12 +8,13 @@ dotenv.config({ path: path.join(rootDir, '.env'), quiet: true });
 
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
+const defaultGoogleClientId = '1018329968245-ak7cqp2ire3arj9ef7o4f85jqia0ci31.apps.googleusercontent.com';
 
 module.exports = {
     rootDir,
     port: process.env.PORT || 3000,
     jwtSecret: process.env.JWT_SECRET || 'minlish_super_secret_key_2026',
-    googleClientId: process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_WEB_CLIENT_ID || '',
+    googleClientId: process.env.GOOGLE_CLIENT_ID || defaultGoogleClientId,
     db: {
         host: process.env.DB_HOST || 'localhost',
         user: process.env.DB_USER || 'root',

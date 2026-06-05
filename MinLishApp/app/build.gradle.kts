@@ -26,7 +26,7 @@ fun buildConfigString(value: String): String {
     return "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
 }
 
-val googleWebClientId = projectConfigValue("GOOGLE_WEB_CLIENT_ID")
+val googleClientId = projectConfigValue("GOOGLE_CLIENT_ID")
 
 android {
     namespace = "com.minlish.app"
@@ -46,11 +46,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:3000/\"")
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", buildConfigString(googleWebClientId))
+        buildConfigField("String", "GOOGLE_CLIENT_ID", buildConfigString(googleClientId))
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("debug/minlish-debug.keystore")
+            storePassword = "minlishdebug"
+            keyAlias = "minlishdebugkey"
+            keyPassword = "minlishdebug"
+        }
     }
 
     buildTypes {
         debug {
+            signingConfig = signingConfigs.getByName("debug")
             buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:3000/\"")
         }
         release {

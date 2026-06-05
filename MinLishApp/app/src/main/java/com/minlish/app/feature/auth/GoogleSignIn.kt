@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
@@ -32,9 +33,9 @@ internal fun rememberGoogleSignInHandler(
 
     return remember(context, credentialManager, onIdToken, onError) {
         {
-            val serverClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID.trim()
+            val serverClientId = BuildConfig.GOOGLE_CLIENT_ID.trim()
             if (serverClientId.isBlank()) {
-                onError("Chưa cấu hình GOOGLE_WEB_CLIENT_ID cho đăng nhập Google.")
+                onError("Chưa cấu hình GOOGLE_CLIENT_ID cho đăng nhập Google.")
             } else {
                 scope.launch {
                     try {
@@ -64,9 +65,17 @@ internal fun rememberGoogleSignInHandler(
                     } catch (e: NoCredentialException) {
                         Log.e(TAG, "No Google account is available", e)
                         onError("Không tìm thấy tài khoản Google khả dụng.")
+                    } catch (e: GetCredentialCancellationException) {
+                        Log.e(TAG, "Google credential request was cancelled or rejected", e)
+                        val message = e.message.orEmpty()
+                        if (message.contains("reauth", ignoreCase = true)) {
+                            onError("Google Cloud chưa đăng ký SHA debug của app.")
+                        } else {
+                            onError("Bạn đã hủy đăng nhập Google.")
+                        }
                     } catch (e: GetCredentialException) {
                         Log.e(TAG, "Google credential request failed", e)
-                        onError("Không thể mở đăng nhập Google. Vui lòng thử lại.")
+                        onError("Không thể mở đăng nhập Google. Kiểm tra cấu hình Google Cloud.")
                     } catch (e: Exception) {
                         Log.e(TAG, "Google sign-in failed", e)
                         onError("Đăng nhập Google thất bại. Vui lòng thử lại.")
