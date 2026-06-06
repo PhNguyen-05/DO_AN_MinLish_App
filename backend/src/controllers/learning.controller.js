@@ -31,11 +31,17 @@ const reviewCard = asyncHandler(async (req, res) => {
     res.json(progress);
 });
 
+const recordPracticeResult = asyncHandler(async (req, res) => {
+    const result = await learningService.recordPracticeResult(req.user.id, req.body);
+    res.json(result);
+});
+
 module.exports = {
     getDailyPlan,
     getLearningSession,
     getDeckSummaries,
     getPracticeDeckSummaries,
     getPracticeCards,
+    recordPracticeResult,
     reviewCard
 };

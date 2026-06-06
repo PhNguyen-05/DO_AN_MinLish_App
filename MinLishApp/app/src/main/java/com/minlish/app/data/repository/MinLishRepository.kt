@@ -124,12 +124,38 @@ class MinLishRepository private constructor(context: Context) {
         return true
     }
 
+    // Synchronize offline practice results queue
+    suspend fun syncPendingPracticeResults(token: String): Boolean {
+        val pending = dao.getPendingPracticeResults()
+        if (pending.isEmpty()) return true
+
+        for (result in pending) {
+            try {
+                api.recordPracticeResult(token, PracticeResultRequest(result.mode, result.correctCount, result.totalCount))
+                dao.deletePendingPracticeResult(result.id)
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() in 400..499) {
+                    // Client error, discard
+                    dao.deletePendingPracticeResult(result.id)
+                } else {
+                    // Server error (5xx), retry next time
+                    return false
+                }
+            } catch (e: Exception) {
+                // Connection error, retry next time
+                return false
+            }
+        }
+        return true
+    }
+
+
     // 1. Dashboard Cache & Sync
     suspend fun getDashboard(token: String, forceRefresh: Boolean = false): DashboardResponse {
         if (!forceRefresh) {
             try {
-                if (!syncPendingReviews(token)) {
-                    throw IOException("Pending review sync is unavailable.")
+                if (!syncPendingReviews(token) || !syncPendingPracticeResults(token)) {
+                    throw IOException("Pending sync is unavailable.")
                 }
                 val response = api.getDashboard(token)
                 dao.insertDashboard(
@@ -304,6 +330,46 @@ class MinLishRepository private constructor(context: Context) {
         return getLocalPracticeCards(deckId, limit)
     }
 
+    suspend fun recordPracticeResult(token: String, request: PracticeResultRequest): PracticeResultResponse {
+        // Sync pending practice results if any
+        syncPendingPracticeResults(token)
+
+        try {
+            val response = api.recordPracticeResult(token, request)
+            dao.getDashboard()?.let { dashboard ->
+                dao.insertDashboard(dashboard.copy(accuracyRate = response.accuracy_rate))
+            }
+            return response
+        } catch (e: Exception) {
+            // Save practice result to sync queue offline
+            dao.insertPendingPracticeResult(
+                PendingPracticeResultEntity(
+                    mode = request.mode,
+                    correctCount = request.correctCount,
+                    totalCount = request.totalCount
+                )
+            )
+
+            // Estimate new accuracy rate locally
+            dao.getDashboard()?.let { dashboard ->
+                val totalWords = dashboard.totalWordsLearned.coerceAtLeast(1)
+                val estTotalAttempts = totalWords * 10
+                val currentAccuracy = dashboard.accuracyRate
+                val newAccuracy = ((currentAccuracy * estTotalAttempts) + request.correctCount) / (estTotalAttempts + request.totalCount)
+                dao.insertDashboard(dashboard.copy(accuracyRate = newAccuracy))
+            }
+
+            val currentAccuracy = dao.getDashboard()?.accuracyRate ?: 0f
+            return PracticeResultResponse(
+                mode = request.mode,
+                correct_count = request.correctCount,
+                total_count = request.totalCount,
+                accuracy_rate = currentAccuracy
+            )
+        }
+    }
+
+
     private suspend fun preloadAllDecks(token: String, decks: List<LearningDeckSummary>) {
         for (deck in decks) {
             try {
@@ -465,11 +531,6 @@ class MinLishRepository private constructor(context: Context) {
         val updatedStreak = if (isFirstStudyToday) dashboard.currentStreak + 1 else dashboard.currentStreak
         val isCorrect = if (request.quality >= 2) 1.0f else 0.0f
         val totalReviewsEst = dashboard.totalWordsLearned * 2
-        val newAccuracy = if (totalReviewsEst == 0) {
-            isCorrect
-        } else {
-            ((dashboard.accuracyRate * totalReviewsEst) + isCorrect) / (totalReviewsEst + 1)
-        }
         val nextTotalWords = dashboard.totalWordsLearned + learnedInc
 
         // Determine Level based on updated stats
@@ -481,9 +542,10 @@ class MinLishRepository private constructor(context: Context) {
             ((currentRetention * totalReviewsEst) + isCorrect) / (totalReviewsEst + 1)
         }
 
+        val currentAccuracy = dashboard.accuracyRate
         val nextLevel = when {
-            nextTotalWords >= 500 && newAccuracy >= 0.75f && nextRetention >= 0.70f -> "Advanced"
-            nextTotalWords >= 150 && newAccuracy >= 0.60f && nextRetention >= 0.55f -> "Intermediate"
+            nextTotalWords >= 500 && currentAccuracy >= 0.75f && nextRetention >= 0.70f -> "Advanced"
+            nextTotalWords >= 150 && currentAccuracy >= 0.60f && nextRetention >= 0.55f -> "Intermediate"
             else -> "Beginner"
         }
 
@@ -491,7 +553,7 @@ class MinLishRepository private constructor(context: Context) {
             dashboard.copy(
                 totalWordsLearned = nextTotalWords,
                 currentStreak = updatedStreak,
-                accuracyRate = newAccuracy,
+                accuracyRate = currentAccuracy,
                 currentLevel = nextLevel
             )
         )
@@ -525,7 +587,8 @@ class MinLishRepository private constructor(context: Context) {
 
         val progressRetention = nextRetention
         val progressLevel = nextLevel
-        val progressReason = "$nextTotalWords từ đã học, đúng ${Math.round(newAccuracy * 100)}%, ghi nhớ ${Math.round(progressRetention * 100)}% trong 30 ngày gần nhất."
+        val progressReason = "$nextTotalWords từ đã học, đúng ${Math.round(currentAccuracy * 100)}%, ghi nhớ ${Math.round(progressRetention * 100)}% trong 30 ngày gần nhất."
+
 
         dao.insertProgress(
             progress.copy(

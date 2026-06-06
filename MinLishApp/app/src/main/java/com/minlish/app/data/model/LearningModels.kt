@@ -63,6 +63,19 @@ data class ReviewCardRequest(
     val quality: Int
 )
 
+data class PracticeResultRequest(
+    val mode: String,
+    val correctCount: Int,
+    val totalCount: Int
+)
+
+data class PracticeResultResponse(
+    val mode: String,
+    val correct_count: Int,
+    val total_count: Int,
+    val accuracy_rate: Float
+)
+
 data class ReviewProgressResponse(
     val card_id: Long,
     val quality: Int,

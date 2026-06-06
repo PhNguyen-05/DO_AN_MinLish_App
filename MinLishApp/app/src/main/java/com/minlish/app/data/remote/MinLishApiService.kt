@@ -12,6 +12,8 @@ import com.minlish.app.data.model.NotificationSummaryResponse
 import com.minlish.app.data.model.ProfileResponse
 import com.minlish.app.data.model.ProfileUpdateRequest
 import com.minlish.app.data.model.ProgressResponse
+import com.minlish.app.data.model.PracticeResultRequest
+import com.minlish.app.data.model.PracticeResultResponse
 import com.minlish.app.data.model.UserSettingsRequest
 import com.minlish.app.data.model.UserSettingsResponse
 import com.minlish.app.data.model.RegisterRequest
@@ -95,6 +97,12 @@ interface MinLishApiService {
         @Header("Authorization") token: String,
         @Body request: ReviewCardRequest
     ): ReviewProgressResponse
+
+    @POST("api/learning/practice/result")
+    suspend fun recordPracticeResult(
+        @Header("Authorization") token: String,
+        @Body request: PracticeResultRequest
+    ): PracticeResultResponse
 
     @GET("api/notifications/summary")
     suspend fun getNotificationSummary(@Header("Authorization") token: String): NotificationSummaryResponse

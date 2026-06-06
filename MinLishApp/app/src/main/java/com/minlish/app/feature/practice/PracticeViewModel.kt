@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.minlish.app.data.local.UserSession
 import com.minlish.app.data.model.LearningCard
 import com.minlish.app.data.model.LearningDeckSummary
+import com.minlish.app.data.model.PracticeResultRequest
 import com.minlish.app.data.repository.MinLishRepository
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -237,6 +238,10 @@ class PracticeViewModel(application: Application) : AndroidViewModel(application
             message = ""
         } else {
             val summary = "Hoàn thành trắc nghiệm: $quizScore/${quizQuestions.size} câu đúng."
+            val total = quizQuestions.size
+            if (total > 0) {
+                submitPracticeResult("quiz", quizScore, total)
+            }
             selectedMode = null
             resetActivities()
             message = summary
@@ -327,6 +332,10 @@ class PracticeViewModel(application: Application) : AndroidViewModel(application
             message = ""
         } else {
             val summary = "Hoàn thành nghe và điền từ: $listenScore/${listenCards.size} câu đúng."
+            val total = listenCards.size
+            if (total > 0) {
+                submitPracticeResult("listening", listenScore, total)
+            }
             selectedMode = null
             resetActivities()
             message = summary
@@ -335,6 +344,11 @@ class PracticeViewModel(application: Application) : AndroidViewModel(application
 
     fun finishMatchingPractice() {
         val total = matchWords.size
+        val correct = total
+        val totalAttempts = total + matchMistakes
+        if (total > 0) {
+            submitPracticeResult("matching", correct, totalAttempts)
+        }
         val summary = "Hoàn thành nối từ: $total/$total cặp, $matchMistakes lần sai."
         selectedMode = null
         resetActivities()
@@ -496,5 +510,16 @@ class PracticeViewModel(application: Application) : AndroidViewModel(application
             .replace("_", " ")
             .replace(Regex("\\s+"), " ")
             .lowercase(Locale.US)
+    }
+
+    private fun submitPracticeResult(mode: String, correctCount: Int, totalCount: Int) {
+        val token = UserSession.token ?: return
+        viewModelScope.launch {
+            try {
+                repository.recordPracticeResult(token, PracticeResultRequest(mode, correctCount, totalCount))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

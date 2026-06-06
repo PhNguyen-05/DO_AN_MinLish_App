@@ -15,9 +15,10 @@ import androidx.room.RoomDatabase
         PendingReviewEntity::class,
         ProfileCache::class,
         UserSettingsCache::class,
-        NotificationSummaryCache::class
+        NotificationSummaryCache::class,
+        PendingPracticeResultEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class MinLishDatabase : RoomDatabase() {
