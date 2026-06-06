@@ -24,6 +24,8 @@ import com.minlish.app.feature.importexport.ImportExportViewModel
 import com.minlish.app.feature.learning.LearningScreen
 import com.minlish.app.feature.learning.LearningViewModel
 import com.minlish.app.feature.notification.NotificationScheduler
+import com.minlish.app.feature.practice.PracticeScreen
+import com.minlish.app.feature.practice.PracticeViewModel
 import com.minlish.app.feature.profile.ProfileScreen
 import com.minlish.app.feature.profile.ProfileViewModel
 import com.minlish.app.ui.theme.MinLishAppTheme
@@ -53,6 +55,7 @@ fun MinLishAppNavigation() {
     val profileViewModel: ProfileViewModel = viewModel()
     val importExportViewModel: ImportExportViewModel = viewModel()
     val learningViewModel: LearningViewModel = viewModel()
+    val practiceViewModel: PracticeViewModel = viewModel()
 
     // Restore login session on app startup for offline auto-login
     val sharedPrefs = context.getSharedPreferences("minlish_auth", android.content.Context.MODE_PRIVATE)
@@ -117,6 +120,7 @@ fun MinLishAppNavigation() {
                 viewModel = homeViewModel,
                 onProfileClick = { navController.navigate("profile") },
                 onImportExportClick = { navController.navigate("import_export") },
+                onPracticeClick = { navController.navigate("practice") },
                 onLearningClick = { deckId, mode ->
                     val deckParam = deckId?.let { "deckId=$it" } ?: ""
                     val modeParam = mode?.let { "mode=$it" } ?: ""
@@ -149,7 +153,17 @@ fun MinLishAppNavigation() {
                     homeViewModel.resetState()
                     profileViewModel.resetState()
                     learningViewModel.resetState()
+                    practiceViewModel.resetState()
                     navController.navigate("login") { popUpTo("home") { inclusive = true } }
+                }
+            )
+        }
+        composable("practice") {
+            PracticeScreen(
+                viewModel = practiceViewModel,
+                onBack = {
+                    homeViewModel.fetchDashboardData()
+                    navController.popBackStack()
                 }
             )
         }

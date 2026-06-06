@@ -217,6 +217,8 @@ Learning:
 GET  /api/learning/plan
 GET  /api/learning/decks
 GET  /api/learning/session
+GET  /api/learning/practice/decks
+GET  /api/learning/practice/cards
 POST /api/learning/review
 ```
 

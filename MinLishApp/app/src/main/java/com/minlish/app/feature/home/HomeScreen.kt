@@ -62,6 +62,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onProfileClick: () -> Unit = {},
     onImportExportClick: () -> Unit = {},
+    onPracticeClick: () -> Unit = {},
     onLearningClick: (Long?, String?) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
@@ -183,7 +184,9 @@ fun HomeScreen(
             Text("Hành động nhanh", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             QuickActionsRow(
                 onImportExportClick = onImportExportClick,
-                onLearningClick = { mode -> onLearningClick(null, mode) }
+                onLearningClick = { mode ->
+                    if (mode == "mixed") onPracticeClick() else onLearningClick(null, mode)
+                }
             )
 
             Text("Tiếp tục học", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -616,7 +619,10 @@ fun StudyReminderSummaryCard(summary: NotificationSummaryResponse?, fallbackDueR
 // NotificationReminderCard was moved to Profile & Settings screen.
 
 @Composable
-fun QuickActionsRow(onImportExportClick: () -> Unit, onLearningClick: (String) -> Unit) {
+fun QuickActionsRow(
+    onImportExportClick: () -> Unit,
+    onLearningClick: (String) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
