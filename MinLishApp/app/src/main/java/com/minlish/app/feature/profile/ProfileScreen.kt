@@ -53,6 +53,9 @@ fun ProfileScreen(
     var expanded by remember { mutableStateOf(false) }
     var avatarUri by remember { mutableStateOf<Uri?>(null) }
     var avatarError by remember { mutableStateOf("") }
+    var hasDeviceNotificationPermission by remember {
+        mutableStateOf(NotificationScheduler.hasNotificationPermission(context))
+    }
 
     val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
@@ -69,6 +72,7 @@ fun ProfileScreen(
     val exactAlarmPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
+        hasDeviceNotificationPermission = NotificationScheduler.hasNotificationPermission(context)
         NotificationScheduler.restoreDailyReminder(context)
     }
     val requestExactAlarmPermission = {
@@ -86,11 +90,15 @@ fun ProfileScreen(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        viewModel.onPushEnabledChange(granted)
-        if (granted) requestExactAlarmPermission()
+        hasDeviceNotificationPermission = NotificationScheduler.hasNotificationPermission(context)
+        viewModel.onPushEnabledChange(granted && hasDeviceNotificationPermission)
+        if (granted && hasDeviceNotificationPermission) requestExactAlarmPermission()
     }
 
-    LaunchedEffect(Unit) { viewModel.loadProfile() }
+    LaunchedEffect(Unit) {
+        viewModel.loadProfile()
+        hasDeviceNotificationPermission = NotificationScheduler.hasNotificationPermission(context)
+    }
 
     Column(
         modifier = Modifier
@@ -274,7 +282,7 @@ fun ProfileScreen(
                         Text("Nhận nhắc nhở trực tiếp từ ứng dụng", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(
-                        checked = viewModel.pushEnabled,
+                        checked = viewModel.pushEnabled && hasDeviceNotificationPermission,
                         onCheckedChange = { enabled ->
                             if (
                                 enabled &&
@@ -284,11 +292,45 @@ fun ProfileScreen(
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
                                 viewModel.onPushEnabledChange(enabled)
+                                hasDeviceNotificationPermission = NotificationScheduler.hasNotificationPermission(context)
                                 if (enabled) requestExactAlarmPermission()
                             }
                         },
                         colors = SwitchDefaults.colors(checkedThumbColor = primaryColor, checkedTrackColor = primaryColor.copy(alpha = 0.5f))
                     )
+                }
+
+                if (viewModel.pushEnabled && !hasDeviceNotificationPermission) {
+                    Text(
+                        "Thiết bị chưa cấp quyền thông báo cho MinLish.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        if (
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            viewModel.onPushEnabledChange(true)
+                            hasDeviceNotificationPermission = NotificationScheduler.hasNotificationPermission(context)
+                            if (hasDeviceNotificationPermission) {
+                                NotificationScheduler.showTestReminder(context)
+                                requestExactAlarmPermission()
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, primaryColor)
+                ) {
+                    Icon(Icons.Default.Notifications, contentDescription = null, tint = primaryColor)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Gửi thử thông báo trên thiết bị", color = primaryColor)
                 }
 
                 HorizontalDivider(color = Color(0xFFE8F0ED))
