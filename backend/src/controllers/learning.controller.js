@@ -16,6 +16,16 @@ const getDeckSummaries = asyncHandler(async (req, res) => {
     res.json(summaries);
 });
 
+const getPracticeDeckSummaries = asyncHandler(async (req, res) => {
+    const summaries = await learningService.getPracticeDeckSummaries(req.user.id);
+    res.json(summaries);
+});
+
+const getPracticeCards = asyncHandler(async (req, res) => {
+    const session = await learningService.getPracticeCards(req.user.id, req.query);
+    res.json(session);
+});
+
 const reviewCard = asyncHandler(async (req, res) => {
     const progress = await learningService.reviewCard(req.user.id, req.body);
     res.json(progress);
@@ -25,5 +35,7 @@ module.exports = {
     getDailyPlan,
     getLearningSession,
     getDeckSummaries,
+    getPracticeDeckSummaries,
+    getPracticeCards,
     reviewCard
 };

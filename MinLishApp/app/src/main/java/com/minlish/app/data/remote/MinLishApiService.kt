@@ -80,6 +80,16 @@ interface MinLishApiService {
         @Query("deckId") deckId: Long? = null
     ): LearningSessionResponse
 
+    @GET("api/learning/practice/decks")
+    suspend fun getPracticeDecks(@Header("Authorization") token: String): LearningDeckListResponse
+
+    @GET("api/learning/practice/cards")
+    suspend fun getPracticeCards(
+        @Header("Authorization") token: String,
+        @Query("deckId") deckId: Long,
+        @Query("limit") limit: Int
+    ): LearningSessionResponse
+
     @POST("api/learning/review")
     suspend fun reviewCard(
         @Header("Authorization") token: String,

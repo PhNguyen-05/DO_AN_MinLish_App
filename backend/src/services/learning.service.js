@@ -158,6 +158,16 @@ async function getDeckSummaries(userId) {
     };
 }
 
+async function getPracticeDeckSummaries(userId) {
+    const summaries = await getDeckSummaries(userId);
+    const decks = summaries.decks.filter(deck => Number(deck.learned_words || 0) > 0);
+
+    return {
+        continue_deck: decks.find(deck => deck.is_in_progress) || decks[0] || null,
+        decks
+    };
+}
+
 async function getLearningSession(userId, options = {}) {
     const mode = ['new', 'review', 'mixed'].includes(options.mode) ? options.mode : 'mixed';
     const limit = normalizeLimit(options.limit);
@@ -175,6 +185,37 @@ async function getLearningSession(userId, options = {}) {
 
     return {
         mode,
+        count: cards.length,
+        cards
+    };
+}
+
+async function getPracticeCards(userId, options = {}) {
+    const limit = normalizeLimit(options.limit);
+    const deckId = options.deckId ? Number.parseInt(options.deckId, 10) : null;
+
+    if (!deckId) {
+        throw createHttpError(400, 'Thiếu deckId.');
+    }
+
+    const [rows] = await db.query(`
+        SELECT c.id, c.deck_id, d.title AS deck_title, c.word, c.pronunciation, c.meaning,
+               c.description_en, c.example, c.collocation, c.related_words, c.note,
+               c.image_url, c.audio_url, cp.ease_factor, cp.repetitions,
+               cp.interval_days, cp.next_review_at
+        FROM card_progress cp
+        JOIN cards c ON cp.card_id = c.id
+        JOIN decks d ON c.deck_id = d.id
+        WHERE cp.user_id = ? AND cp.repetitions > 0
+          AND (d.user_id IS NULL OR d.user_id = ?)
+          AND c.deck_id = ?
+        ORDER BY cp.last_reviewed_at DESC, c.id ASC
+        LIMIT ?
+    `, [userId, userId, deckId, limit]);
+
+    const cards = rows.map(row => toLearningCard(row, 'practice'));
+    return {
+        mode: 'practice',
         count: cards.length,
         cards
     };
@@ -431,7 +472,9 @@ module.exports = {
     REVIEW_QUALITY,
     getDailyPlan,
     getDeckSummaries,
+    getPracticeDeckSummaries,
     getLearningSession,
+    getPracticeCards,
     reviewCard,
     refreshUserStatistics
 };

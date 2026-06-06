@@ -260,6 +260,50 @@ class MinLishRepository private constructor(context: Context) {
         return getCachedLearningDeckList()
     }
 
+    suspend fun getPracticeDecks(token: String): LearningDeckListResponse {
+        try {
+            val response = api.getPracticeDecks(token)
+            val entities = response.decks.map {
+                DeckEntity(
+                    id = it.id,
+                    title = it.title,
+                    description = it.description,
+                    totalWords = it.total_words,
+                    learnedWords = it.learned_words,
+                    newWordsCount = it.new_words_count,
+                    dueReviewCount = it.due_review_count,
+                    lastStudiedAt = it.last_studied_at,
+                    isCompleted = it.is_completed,
+                    isInProgress = it.is_in_progress
+                )
+            }
+            dao.insertDecks(entities)
+        } catch (e: Exception) {
+            // Fallback to cache below.
+        }
+
+        return getCachedPracticeDeckList()
+    }
+
+    suspend fun getPracticeCards(token: String, deckId: Long, limit: Int = 50): LearningSessionResponse {
+        if (deckId < 0) {
+            return getLocalPracticeCards(deckId, limit)
+        }
+
+        try {
+            if (!syncPendingReviews(token)) {
+                throw IOException("Pending review sync is unavailable.")
+            }
+            val response = api.getPracticeCards(token, deckId, limit)
+            dao.insertCards(response.cards.map { it.toCardEntity() })
+            return response
+        } catch (e: Exception) {
+            // Fallback to cached cards for offline practice.
+        }
+
+        return getLocalPracticeCards(deckId, limit)
+    }
+
     private suspend fun preloadAllDecks(token: String, decks: List<LearningDeckSummary>) {
         for (deck in decks) {
             try {
@@ -687,6 +731,17 @@ class MinLishRepository private constructor(context: Context) {
         )
     }
 
+    private suspend fun getCachedPracticeDeckList(): LearningDeckListResponse {
+        val decks = dao.getDecks()
+            .map { it.toLearningDeckSummary() }
+            .filter { it.learned_words > 0 }
+
+        return LearningDeckListResponse(
+            continue_deck = decks.firstOrNull { it.is_in_progress } ?: decks.firstOrNull(),
+            decks = decks
+        )
+    }
+
     private fun DeckEntity.toLearningDeckSummary(): LearningDeckSummary {
         return LearningDeckSummary(
             id = id,
@@ -727,6 +782,29 @@ class MinLishRepository private constructor(context: Context) {
         )
     }
 
+    private fun LearningCard.toCardEntity(): CardEntity {
+        return CardEntity(
+            id = id,
+            deckId = deck_id,
+            deckTitle = deck_title,
+            word = word,
+            pronunciation = pronunciation,
+            meaning = meaning,
+            descriptionEn = description_en,
+            example = example,
+            collocation = collocation,
+            relatedWords = related_words,
+            note = note,
+            imageUrl = image_url,
+            audioUrl = audio_url,
+            type = type,
+            easeFactor = progress?.ease_factor ?: 2.5,
+            repetitions = progress?.repetitions ?: 0,
+            intervalDays = progress?.interval_days ?: 0,
+            nextReviewAt = progress?.next_review_at
+        )
+    }
+
     private suspend fun getLocalLearningSession(mode: String, limit: Int, deckId: Long?): LearningSessionResponse {
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
         format.timeZone = TimeZone.getTimeZone("UTC")
@@ -749,6 +827,19 @@ class MinLishRepository private constructor(context: Context) {
         val cards = localCards.take(limit).map { (card, cardType) -> card.toLearningCard(cardType) }
         return LearningSessionResponse(
             mode = mode,
+            count = cards.size,
+            cards = cards
+        )
+    }
+
+    private suspend fun getLocalPracticeCards(deckId: Long, limit: Int): LearningSessionResponse {
+        val cards = dao.getCardsForDeck(deckId)
+            .filter { it.repetitions > 0 }
+            .take(limit)
+            .map { it.toLearningCard("practice") }
+
+        return LearningSessionResponse(
+            mode = "practice",
             count = cards.size,
             cards = cards
         )
