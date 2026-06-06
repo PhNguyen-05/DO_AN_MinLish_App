@@ -24,8 +24,17 @@ object NotificationScheduler {
     private const val NOTIFICATION_ID = 3501
 
     fun hasNotificationPermission(context: Context): Boolean {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+        val hasRuntimePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        return hasRuntimePermission && NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    fun showTestReminder(context: Context) {
+        showStudyReminder(
+            context = context,
+            title = "MinLish nhắc học",
+            body = "Thông báo nhắc học trên thiết bị đang hoạt động."
+        )
     }
 
     fun scheduleDailyReminder(context: Context, hour: Int = 20, minute: Int = 0) {
