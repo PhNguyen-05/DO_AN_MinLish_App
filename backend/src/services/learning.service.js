@@ -8,6 +8,8 @@ const REVIEW_QUALITY = {
     EASY: 3
 };
 
+const PRACTICE_MODES = new Set(['quiz', 'matching', 'listening']);
+
 function normalizeLimit(value) {
     const parsed = Number.parseInt(value, 10);
     if (Number.isNaN(parsed)) return 20;
@@ -388,6 +390,60 @@ async function reviewCard(userId, payload) {
     };
 }
 
+async function ensurePracticeLogsTable() {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS practice_logs (
+            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+            user_id BIGINT NOT NULL,
+            mode VARCHAR(32) NOT NULL,
+            correct_count INT NOT NULL DEFAULT 0,
+            total_count INT NOT NULL DEFAULT 0,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_practice_logs_user_created (user_id, created_at)
+        )
+    `);
+}
+
+async function recordPracticeResult(userId, payload) {
+    const mode = String(payload.mode || '').trim().toLowerCase();
+    const correctCount = Number.parseInt(payload.correctCount, 10);
+    const totalCount = Number.parseInt(payload.totalCount, 10);
+
+    if (!PRACTICE_MODES.has(mode)) {
+        throw createHttpError(400, 'Hinh thuc luyen tap khong hop le.');
+    }
+
+    if (!Number.isInteger(totalCount) || totalCount <= 0 || totalCount > 500) {
+        throw createHttpError(400, 'Tong so cau luyen tap khong hop le.');
+    }
+
+    if (!Number.isInteger(correctCount) || correctCount < 0 || correctCount > totalCount) {
+        throw createHttpError(400, 'So cau dung khong hop le.');
+    }
+
+    await ensurePracticeLogsTable();
+
+    await db.query(`
+        INSERT INTO practice_logs (user_id, mode, correct_count, total_count)
+        VALUES (?, ?, ?, ?)
+    `, [userId, mode, correctCount, totalCount]);
+
+    await refreshUserStatistics(userId);
+
+    const [[stats]] = await db.query(`
+        SELECT COALESCE(accuracy_rate, 0) AS accuracy_rate
+        FROM user_statistics
+        WHERE user_id = ?
+    `, [userId]);
+
+    return {
+        mode,
+        correct_count: correctCount,
+        total_count: totalCount,
+        accuracy_rate: Number(stats?.accuracy_rate || 0)
+    };
+}
+
 async function refreshUserStatistics(userId) {
     const [[learned]] = await db.query(`
         SELECT COUNT(*) AS count
@@ -398,14 +454,17 @@ async function refreshUserStatistics(userId) {
           AND (d.user_id IS NULL OR d.user_id = ?)
     `, [userId, userId]);
 
+    await ensurePracticeLogsTable();
+
     const [[accuracy]] = await db.query(`
-        SELECT AVG(CASE WHEN ll.quality >= 2 THEN 1 ELSE 0 END) AS rate
-        FROM learning_logs ll
-        JOIN cards c ON ll.card_id = c.id
-        JOIN decks d ON c.deck_id = d.id
-        WHERE ll.user_id = ?
-          AND (d.user_id IS NULL OR d.user_id = ?)
-    `, [userId, userId]);
+        SELECT
+            CASE
+                WHEN COALESCE(SUM(total_count), 0) = 0 THEN 0
+                ELSE SUM(correct_count) / SUM(total_count)
+            END AS rate
+        FROM practice_logs
+        WHERE user_id = ?
+    `, [userId]);
 
     const currentStreak = await calculateCurrentStreak(userId);
 
@@ -475,6 +534,7 @@ module.exports = {
     getPracticeDeckSummaries,
     getLearningSession,
     getPracticeCards,
+    recordPracticeResult,
     reviewCard,
     refreshUserStatistics
 };

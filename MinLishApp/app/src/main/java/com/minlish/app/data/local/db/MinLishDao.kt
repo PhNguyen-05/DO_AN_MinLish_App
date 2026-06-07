@@ -104,4 +104,15 @@ interface MinLishDao {
 
     @Query("SELECT * FROM notification_summary_cache WHERE id = 1 LIMIT 1")
     suspend fun getNotificationSummary(): NotificationSummaryCache?
+
+    // Pending Practice Results (Sync Queue)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPendingPracticeResult(result: PendingPracticeResultEntity)
+
+    @Query("SELECT * FROM pending_practice_results ORDER BY timestamp ASC, id ASC")
+    suspend fun getPendingPracticeResults(): List<PendingPracticeResultEntity>
+
+    @Query("DELETE FROM pending_practice_results WHERE id = :id")
+    suspend fun deletePendingPracticeResult(id: Long)
 }
+

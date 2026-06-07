@@ -115,3 +115,13 @@ data class NotificationSummaryCache(
     val pushTitle: String,
     val pushBody: String
 )
+
+@Entity(tableName = "pending_practice_results")
+data class PendingPracticeResultEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val mode: String,
+    val correctCount: Int,
+    val totalCount: Int,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
