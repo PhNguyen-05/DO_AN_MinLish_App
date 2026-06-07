@@ -55,6 +55,7 @@ import com.minlish.app.data.model.ProgressResponse
 import com.minlish.app.data.remote.RetrofitClient
 import com.minlish.app.feature.notification.ReminderPreferences
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,7 +164,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatCard("📚", "Từ đã học", "${data?.total_words_learned ?: 0}", modifier = Modifier.weight(1f))
-                StatCard("🎯", "Chính xác", "${(data?.accuracy_rate?.times(100) ?: 0f).toInt()}%", modifier = Modifier.weight(1f))
+                StatCard("🎯", "Chính xác", percentText(data?.accuracy_rate ?: 0f), modifier = Modifier.weight(1f))
             }
 
             DailyGoalCard(
@@ -442,7 +443,7 @@ fun LevelEstimationCard(progress: ProgressResponse?, modifier: Modifier = Modifi
 
 @Composable
 fun RetentionRateCard(rate: Float, modifier: Modifier = Modifier) {
-    val percent = (rate * 100).toInt().coerceIn(0, 100)
+    val percent = percentValue(rate)
     val animatedRate by animateFloatAsState(
         targetValue = rate.coerceIn(0f, 1f),
         animationSpec = tween(durationMillis = 650),
@@ -907,6 +908,12 @@ fun SuggestedDeckCard(
             }
         }
     }
+}
+
+private fun percentText(rate: Float): String = "${percentValue(rate)}%"
+
+private fun percentValue(rate: Float): Int {
+    return (rate.coerceIn(0f, 1f) * 100f).roundToInt().coerceIn(0, 100)
 }
 
 private fun deckAccentColor(deckId: Long): Color {

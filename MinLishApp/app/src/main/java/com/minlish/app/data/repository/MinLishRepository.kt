@@ -456,12 +456,13 @@ class MinLishRepository private constructor(context: Context) {
     // 6. Review Card SM-2 Algorithm & Offline queue
     suspend fun reviewCard(token: String, request: ReviewCardRequest): ReviewProgressResponse {
         val card = dao.getCardById(request.cardId) ?: throw IOException("Không tìm thấy thẻ này trong cơ sở dữ liệu local.")
-        val sm2 = calculateOfflineSm2(card.easeFactor, card.repetitions, card.intervalDays, request.quality)
+        val sm2 = calculateOfflineSm2(card.easeFactor, card.repetitions, card.intervalDays, card.nextReviewAt, request.quality)
+        val nextCardType = if (sm2.repetitions > 0) "review" else card.type
 
         // Update offline daily statistics, deck summaries, and dashboard stats ALWAYS
-        val wasNew = card.repetitions == 0
-        val learnedInc = if (wasNew && request.quality > 0) 1 else 0
-        val reviewedInc = if (!wasNew) 1 else 0
+        val hasSuccessfulReview = card.repetitions > 0 || card.type != "new"
+        val learnedInc = if (!hasSuccessfulReview && request.quality > 0) 1 else 0
+        val reviewedInc = if (hasSuccessfulReview) 1 else 0
 
         // 1. Update LearningPlanCache
         val stats = dao.getLearningPlan() ?: LearningPlanCache(
@@ -638,6 +639,7 @@ class MinLishRepository private constructor(context: Context) {
             dao.insertCards(
                 listOf(
                     card.copy(
+                        type = nextCardType,
                         easeFactor = sm2.easeFactor,
                         repetitions = sm2.repetitions,
                         intervalDays = sm2.intervalDays,
@@ -665,6 +667,7 @@ class MinLishRepository private constructor(context: Context) {
             dao.insertCards(
                 listOf(
                     card.copy(
+                        type = if (response.repetitions > 0) "review" else card.type,
                         easeFactor = response.ease_factor,
                         repetitions = response.repetitions,
                         intervalDays = response.interval_days,
@@ -676,6 +679,7 @@ class MinLishRepository private constructor(context: Context) {
         } catch (e: Exception) {
             // Save local offline calculation progress on network failure
             val updatedCard = card.copy(
+                type = nextCardType,
                 easeFactor = sm2.easeFactor,
                 repetitions = sm2.repetitions,
                 intervalDays = sm2.intervalDays,
@@ -706,11 +710,13 @@ class MinLishRepository private constructor(context: Context) {
         easeFactor: Double,
         repetitions: Int,
         intervalDays: Int,
+        nextReviewAt: String?,
         quality: Int
     ): Sm2Result {
         var nextEase = easeFactor
         var nextRepetitions = repetitions
         var nextInterval = intervalDays
+        val isRetryAfterAgain = repetitions == 0 && intervalDays == 0 && !nextReviewAt.isNullOrBlank()
         val calendar = Calendar.getInstance()
 
         when (quality) {
@@ -739,7 +745,7 @@ class MinLishRepository private constructor(context: Context) {
                 nextEase = easeFactor + 0.15
                 nextRepetitions = repetitions + 1
                 nextInterval = when (repetitions) {
-                    0 -> 3
+                    0 -> if (isRetryAfterAgain) 1 else 3
                     1 -> 7
                     else -> maxOf(1, Math.round(intervalDays * easeFactor * 1.3).toInt())
                 }

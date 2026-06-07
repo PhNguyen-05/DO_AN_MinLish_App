@@ -26,6 +26,8 @@ async function getDashboardByUserId(userId) {
 }
 
 async function getProgressByUserId(userId) {
+    await learningService.refreshUserStatistics(userId);
+
     const [activityRows] = await db.query(`
         SELECT DATE_FORMAT(study_date, '%Y-%m-%d') AS date,
                words_learned,

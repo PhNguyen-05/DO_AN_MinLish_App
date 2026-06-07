@@ -20,6 +20,7 @@ function calculateSm2Progress(progress, quality) {
     const currentEase = Number(progress?.ease_factor || 2.5);
     const currentRepetitions = Number(progress?.repetitions || 0);
     const currentInterval = Number(progress?.interval_days || 0);
+    const isRetryAfterAgain = Boolean(progress) && currentRepetitions === 0 && currentInterval === 0;
 
     let easeFactor = currentEase;
     let repetitions = currentRepetitions;
@@ -45,7 +46,8 @@ function calculateSm2Progress(progress, quality) {
     } else if (quality === REVIEW_QUALITY.EASY) {
         easeFactor = currentEase + 0.15;
         repetitions = currentRepetitions + 1;
-        if (currentRepetitions === 0) intervalDays = 3;
+        if (isRetryAfterAgain) intervalDays = 1;
+        else if (currentRepetitions === 0) intervalDays = 3;
         else if (currentRepetitions === 1) intervalDays = 7;
         else intervalDays = Math.max(1, Math.round(currentInterval * easeFactor * 1.3));
         nextReviewAt = addDays(intervalDays);
@@ -331,9 +333,14 @@ async function reviewCard(userId, payload) {
         LIMIT 1
     `, [userId, cardId]);
     const existing = existingRows[0];
-    const wasNewCard = !existing || Number(existing.repetitions || 0) === 0;
-    const learnedIncrement = wasNewCard && quality !== REVIEW_QUALITY.AGAIN ? 1 : 0;
-    const reviewedIncrement = !wasNewCard ? 1 : 0;
+    const [[history]] = await db.query(`
+        SELECT COUNT(*) AS successful_count
+        FROM learning_logs
+        WHERE user_id = ? AND card_id = ? AND quality <> ?
+    `, [userId, cardId, REVIEW_QUALITY.AGAIN]);
+    const hasSuccessfulReview = Number(existing?.repetitions || 0) > 0 || Number(history?.successful_count || 0) > 0;
+    const learnedIncrement = !hasSuccessfulReview && quality !== REVIEW_QUALITY.AGAIN ? 1 : 0;
+    const reviewedIncrement = hasSuccessfulReview ? 1 : 0;
     const next = calculateSm2Progress(existing, quality);
 
     const connection = await db.getConnection();
