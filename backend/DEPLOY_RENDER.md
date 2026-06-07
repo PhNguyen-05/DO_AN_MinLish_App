@@ -50,7 +50,7 @@ Render Free blocks outbound SMTP ports, so production email should use the Googl
 
 ```env
 MAIL_PROVIDER=google_script
-GOOGLE_SCRIPT_MAIL_URL=https://script.google.com/macros/s/AKfycbw36E5_PaoPo2DQl6y4zQr9EGs6nRm_2FHlUzy2AiuqPkkZooDfnULvVwEzw9V63nwqZQ/exec
+GOOGLE_SCRIPT_MAIL_URL=https://script.google.com/macros/s/AKfycbx7LgR2YaragbesI-BTZ8RMCqTdvN1Xah0aii1C6gMN5qKEuP2eTGIKzOPSvPiwy4Bm/exec
 GOOGLE_SCRIPT_MAIL_SECRET=minlish_mail_secret_2026
 ```
 

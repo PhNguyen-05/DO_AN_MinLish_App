@@ -16,13 +16,15 @@ function sendWithTimeout(mailOptions) {
 }
 
 async function sendMail(mailOptions) {
+    const normalizedMailOptions = normalizeMailOptions(mailOptions);
+
     if (env.mailProvider === 'google_script') {
-        await sendGoogleScriptMail(mailOptions);
+        await sendGoogleScriptMail(normalizedMailOptions);
         return;
     }
 
     if (env.mailProvider === 'brevo') {
-        await sendBrevoMail(mailOptions);
+        await sendBrevoMail(normalizedMailOptions);
         return;
     }
 
@@ -35,7 +37,7 @@ async function sendMail(mailOptions) {
     }
 
     try {
-        await sendWithTimeout(mailOptions);
+        await sendWithTimeout(normalizedMailOptions);
     } catch (error) {
         if (error.statusCode) {
             throw error;
@@ -63,7 +65,7 @@ async function sendGoogleScriptMail(mailOptions) {
                 to: mailOptions.to,
                 subject: mailOptions.subject,
                 text: mailOptions.text || '',
-                html: mailOptions.html || mailOptions.text || ''
+                html: mailOptions.html || plainTextToHtml(mailOptions.text || '')
             }),
             signal: controller.signal
         });
@@ -111,7 +113,8 @@ async function sendBrevoMail(mailOptions) {
                 },
                 to: [{ email: mailOptions.to }],
                 subject: mailOptions.subject,
-                textContent: mailOptions.text
+                textContent: mailOptions.text,
+                htmlContent: mailOptions.html || plainTextToHtml(mailOptions.text || '')
             }),
             signal: controller.signal
         });
@@ -139,6 +142,30 @@ function parseJsonBody(bodyText) {
     } catch {
         return {};
     }
+}
+
+function normalizeMailOptions(mailOptions) {
+    if (!mailOptions || !mailOptions.text || mailOptions.html) {
+        return mailOptions;
+    }
+
+    return {
+        ...mailOptions,
+        html: plainTextToHtml(mailOptions.text)
+    };
+}
+
+function plainTextToHtml(text) {
+    return escapeHtml(text).replace(/\r?\n/g, '<br>');
+}
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 async function verifyEmailProvider() {
@@ -182,37 +209,51 @@ async function verifyEmailProvider() {
 }
 
 async function sendPasswordResetOtp(email, otp) {
+    const text = [
+        'Chào bạn,',
+        '',
+        `Mã OTP đặt lại mật khẩu MinLish của bạn là: ${otp}`,
+        '',
+        'Mã này có hiệu lực trong 10 phút. Vui lòng không chia sẻ mã này với người khác.',
+        '',
+        'MinLish'
+    ].join('\n');
+
     await sendMail({
         from: `"MinLish" <${env.smtp.from}>`,
         to: email,
-        subject: 'MinLish - Ma OTP dat lai mat khau',
-        text: `Ma OTP cua ban la ${otp}. Ma co hieu luc trong 10 phut.`
+        subject: 'MinLish - Mã OTP đặt lại mật khẩu',
+        text
     });
 }
 
 async function sendStudyReminderEmail(email, payload) {
-    const name = payload.full_name || 'ban';
+    const name = payload.full_name || 'bạn';
     const newWordsLeft = Number(payload.new_words_available || 0);
     const dueReviewCount = Number(payload.due_review_count || 0);
     const learnedToday = Number(payload.words_learned_today || 0);
     const dailyGoal = Number(payload.daily_new_words_goal || 0);
     const reviewedToday = Number(payload.words_reviewed_today || 0);
     const reviewGoal = Number(payload.daily_review_goal || 0);
+    const text = [
+        `Chào ${name},`,
+        '',
+        'Đã đến lúc quay lại MinLish để giữ nhịp học hôm nay.',
+        '',
+        `Từ mới hôm nay: ${learnedToday}/${dailyGoal}.`,
+        `Thẻ ôn tập hôm nay: ${reviewedToday}/${reviewGoal}.`,
+        `Hiện còn ${newWordsLeft} từ mới có thể học và ${dueReviewCount} thẻ đến hạn ôn.`,
+        '',
+        'Mở MinLish để tiếp tục học nhé.',
+        '',
+        'MinLish'
+    ].join('\n');
 
     await sendMail({
         from: `"MinLish" <${env.smtp.from}>`,
         to: email,
-        subject: 'MinLish - Nhac hoc tu vung hom nay',
-        text: [
-            `Chao ${name},`,
-            '',
-            'Da den luc quay lai MinLish de giu nhip hoc hom nay.',
-            `Tu moi hom nay: ${learnedToday}/${dailyGoal}.`,
-            `The on tap hom nay: ${reviewedToday}/${reviewGoal}.`,
-            `Hien con ${newWordsLeft} tu moi co the hoc va ${dueReviewCount} the den han on.`,
-            '',
-            'Mo MinLish de tiep tuc hoc nhe.'
-        ].join('\n')
+        subject: 'MinLish - Nhắc học từ vựng hôm nay',
+        text
     });
 }
 
