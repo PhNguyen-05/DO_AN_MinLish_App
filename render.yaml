@@ -29,9 +29,11 @@ services:
       - key: REMINDER_TIME_ZONE
         value: Asia/Bangkok
       - key: MAIL_PROVIDER
-        value: brevo
-      - key: BREVO_API_KEY
-        sync: false
+        value: google_script
+      - key: GOOGLE_SCRIPT_MAIL_URL
+        value: https://script.google.com/macros/s/AKfycbw36E5_PaoPo2DQl6y4zQr9EGs6nRm_2FHlUzy2AiuqPkkZooDfnULvVwEzw9V63nwqZQ/exec
+      - key: GOOGLE_SCRIPT_MAIL_SECRET
+        value: minlish_mail_secret_2026
       - key: ENABLE_KEEP_ALIVE
         value: "true"
       - key: KEEP_ALIVE_URL

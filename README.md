@@ -113,13 +113,14 @@ SMTP_FAMILY=4
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM=your-email@gmail.com
-MAIL_PROVIDER=brevo
-BREVO_API_KEY=your-brevo-api-key
+MAIL_PROVIDER=google_script
+GOOGLE_SCRIPT_MAIL_URL=https://script.google.com/macros/s/AKfycbw36E5_PaoPo2DQl6y4zQr9EGs6nRm_2FHlUzy2AiuqPkkZooDfnULvVwEzw9V63nwqZQ/exec
+GOOGLE_SCRIPT_MAIL_SECRET=minlish_mail_secret_2026
 ENABLE_EMAIL_REMINDERS=true
 REMINDER_TIME_ZONE=Asia/Bangkok
 ```
 
-`GOOGLE_CLIENT_ID` also has a default fallback in `backend/src/config/env.js`, so team members do not need to configure a new Google OAuth client just to run Google login. SMTP only needs real credentials if the team wants email OTP or email reminders to work.
+`GOOGLE_CLIENT_ID` also has a default fallback in `backend/src/config/env.js`, so team members do not need to configure a new Google OAuth client just to run Google login. In production, the `deploy` branch uses Google Apps Script by default for email because Render Free blocks SMTP ports. SMTP only needs real credentials if the team wants to test SMTP locally or deploy on a host that allows SMTP.
 
 Create the MySQL database:
 

@@ -22,7 +22,7 @@ if (env.smtp.user && env.smtp.pass) {
             pass: env.smtp.pass
         }
     });
-} else {
+} else if (env.mailProvider === 'smtp') {
     console.warn('SMTP credentials not provided. Forgot-password emails will fail until SMTP_USER and SMTP_PASS are set.');
 }
 

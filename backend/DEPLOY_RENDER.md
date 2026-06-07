@@ -46,13 +46,15 @@ KEEP_ALIVE_URL=https://do-an-minlish-app.onrender.com/health/db
 KEEP_ALIVE_INTERVAL_MINUTES=10
 ```
 
-Render Free blocks outbound SMTP ports, so production email should use Brevo HTTP API:
+Render Free blocks outbound SMTP ports, so production email should use the Google Apps Script mail relay:
 
 ```env
-MAIL_PROVIDER=brevo
-BREVO_API_KEY=<your Brevo API key>
-SMTP_FROM=<verified Brevo sender email>
+MAIL_PROVIDER=google_script
+GOOGLE_SCRIPT_MAIL_URL=https://script.google.com/macros/s/AKfycbw36E5_PaoPo2DQl6y4zQr9EGs6nRm_2FHlUzy2AiuqPkkZooDfnULvVwEzw9V63nwqZQ/exec
+GOOGLE_SCRIPT_MAIL_SECRET=minlish_mail_secret_2026
 ```
+
+The `deploy` branch already has these Google Apps Script values as production defaults. If Render has an old `MAIL_PROVIDER=brevo` variable, replace it with `MAIL_PROVIDER=google_script` or delete it.
 
 For local development or non-Render hosts that allow SMTP, Gmail SMTP can still be used:
 
@@ -91,6 +93,18 @@ Expected response:
 
 ```json
 {"status":"ok","database":"ok"}
+```
+
+To verify the configured email provider, open:
+
+```text
+https://<your-render-service>.onrender.com/health/email
+```
+
+For Google Apps Script, the expected provider is:
+
+```json
+{"provider":"google_script","status":"configured"}
 ```
 
 ## Android API URL

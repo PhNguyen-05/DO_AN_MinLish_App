@@ -4,6 +4,7 @@ const { createHttpError } = require('../utils/httpError');
 
 const SEND_TIMEOUT_MS = 25000;
 const BREVO_TIMEOUT_MS = 25000;
+const GOOGLE_SCRIPT_TIMEOUT_MS = 25000;
 
 function sendWithTimeout(mailOptions) {
     return Promise.race([
@@ -15,9 +16,18 @@ function sendWithTimeout(mailOptions) {
 }
 
 async function sendMail(mailOptions) {
+    if (env.mailProvider === 'google_script') {
+        await sendGoogleScriptMail(mailOptions);
+        return;
+    }
+
     if (env.mailProvider === 'brevo') {
         await sendBrevoMail(mailOptions);
         return;
+    }
+
+    if (env.mailProvider !== 'smtp') {
+        throw createHttpError(500, `MAIL_PROVIDER khong duoc ho tro: ${env.mailProvider}`);
     }
 
     if (!transporter) {
@@ -31,6 +41,47 @@ async function sendMail(mailOptions) {
             throw error;
         }
         throw createHttpError(502, `Khong gui duoc email qua SMTP: ${error.message}`);
+    }
+}
+
+async function sendGoogleScriptMail(mailOptions) {
+    if (!env.googleScriptMail.url || !env.googleScriptMail.secret) {
+        throw createHttpError(500, 'Google Apps Script mail chua duoc cau hinh tren server.');
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), GOOGLE_SCRIPT_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(env.googleScriptMail.url, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                secret: env.googleScriptMail.secret,
+                to: mailOptions.to,
+                subject: mailOptions.subject,
+                text: mailOptions.text || '',
+                html: mailOptions.html || mailOptions.text || ''
+            }),
+            signal: controller.signal
+        });
+
+        const bodyText = await response.text();
+        const body = bodyText ? parseJsonBody(bodyText) : {};
+        if (!response.ok || body.ok === false) {
+            const message = body.message || bodyText || response.statusText;
+            throw createHttpError(502, `Google Apps Script mail failed (${response.status}): ${message}`);
+        }
+    } catch (error) {
+        if (error.statusCode) {
+            throw error;
+        }
+        const message = error.name === 'AbortError' ? 'Google Apps Script mail qua thoi gian cho.' : error.message;
+        throw createHttpError(502, `Khong gui duoc email qua Google Apps Script: ${message}`);
+    } finally {
+        clearTimeout(timeout);
     }
 }
 
@@ -91,6 +142,14 @@ function parseJsonBody(bodyText) {
 }
 
 async function verifyEmailProvider() {
+    if (env.mailProvider === 'google_script') {
+        if (!env.googleScriptMail.url || !env.googleScriptMail.secret) {
+            throw createHttpError(500, 'Google Apps Script mail chua duoc cau hinh tren server.');
+        }
+
+        return { provider: 'google_script', status: 'configured' };
+    }
+
     if (env.mailProvider === 'brevo') {
         if (!env.brevo.apiKey) {
             throw createHttpError(500, 'Brevo chua duoc cau hinh tren server. Vui long thiet lap BREVO_API_KEY.');
@@ -108,6 +167,10 @@ async function verifyEmailProvider() {
         }
 
         return { provider: 'brevo', status: 'ok' };
+    }
+
+    if (env.mailProvider !== 'smtp') {
+        throw createHttpError(500, `MAIL_PROVIDER khong duoc ho tro: ${env.mailProvider}`);
     }
 
     if (!transporter) {

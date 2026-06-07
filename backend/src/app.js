@@ -58,6 +58,7 @@ app.get('/health/email', async (req, res) => {
     const config = {
         provider: env.mailProvider,
         fromConfigured: Boolean(env.smtp.from),
+        googleScriptConfigured: Boolean(env.googleScriptMail.url && env.googleScriptMail.secret),
         brevoConfigured: Boolean(env.brevo.apiKey),
         smtpConfigured: Boolean(env.smtp.user && env.smtp.pass)
     };
